@@ -1,0 +1,127 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: #000;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#faceCanvas {
+  display: block;
+  max-width: 100vw;
+  max-height: 100vh;
+  object-fit: contain;
+}
+
+.status-ok {
+  color: #00ff88;
+  text-shadow: 0 0 8px #00ff88;
+}
+
+.status-ready {
+  color: #00ff88;
+  text-shadow: 0 0 8px #00ff88;
+}
+
+.status-off {
+  color: #ff3b3b;
+  text-shadow: 0 0 8px #ff3b3b;
+}
+
+.status-idle {
+  color: #00ff88;
+  text-shadow: 0 0 8px #00ff88;
+}
+
+.status-listening {
+  color: #4cc9ff;
+  text-shadow: 0 0 8px #4cc9ff;
+}
+
+.status-speaking {
+  color: #00e5ff;
+  text-shadow: 0 0 8px #00e5ff;
+}
+
+.status-online {
+  color: #00ff88;
+  text-shadow: 0 0 8px #00ff88;
+}
+
+.status-offline {
+  color: #ff3b3b;
+  text-shadow: 0 0 8px #ff3b3b;
+}
+
+#g-status,
+#g-state,
+#g-network,
+#g-emotion,
+#g-voice,
+#g-mic,
+#g-camera,
+#g-model {
+  color: #c8ced6;
+  text-shadow: 0 0 6px #c8ced6;
+}
+
+/* Icon Status Overrides */
+.icon-active {
+  color: #00ff88;
+}
+
+.icon-active svg {
+  fill: #00ff88 !important;
+  filter: drop-shadow(0 0 8px #00ff88);
+}
+
+.icon-off {
+  color: #ff3b3b;
+}
+
+.icon-off svg {
+  fill: #ff3b3b !important;
+  filter: drop-shadow(0 0 8px #ff3b3b);
+}
+
+.icon-idle {
+  color: #c8ced6;
+}
+
+.icon-idle svg {
+  fill: #c8ced6 !important;
+  filter: drop-shadow(0 0 6px #c8ced6);
+}
+
+.icon-listening {
+  color: #4cc9ff;
+}
+
+.icon-listening svg {
+  fill: #4cc9ff !important;
+  filter: drop-shadow(0 0 8px #4cc9ff);
+}
+
+.icon-speaking {
+  color: #00e5ff;
+}
+
+.icon-speaking svg {
+  fill: #00e5ff !important;
+  filter: drop-shadow(0 0 8px #00e5ff);
+}
+
+.icon-svg {
+  width: 1.2vw;
+  height: 1.2vw;
+  display: block;
+}

@@ -1,0 +1,23 @@
+[project]
+name = "robot_ai"
+version = "1.0.0"
+description = "GENESIS Robot AI System"
+dependencies = [
+    "sounddevice",
+    "numpy",
+    "faster-whisper",
+    "websockets",
+    "aiohttp",
+    "pyttsx3"
+]
+
+[tool.setuptools]
+packages = ["."]
+
+[tool.pyright]
+include = ["."]
+extraPaths = ["."]
+
+[tool.pyre]
+source_directories = ["."]
+search_path = ["."]

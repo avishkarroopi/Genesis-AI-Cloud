@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════════════════════════════════
+   GENESIS MENU — Phase 3
+   3-dot hamburger menu with glassmorphism dropdown.
+   Safe margin placement to avoid HUD widget overlap.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Menu Button ── */
+#genesis-menu-btn {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 1000;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  background: rgba(10, 15, 30, 0.5);
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  opacity: 0; /* Hidden until splash dismisses */
+  pointer-events: auto;
+}
+
+#genesis-menu-btn:hover {
+  background: rgba(0, 200, 255, 0.12);
+  border-color: rgba(0, 200, 255, 0.5);
+  box-shadow: 0 0 12px rgba(0, 200, 255, 0.25);
+}
+
+#genesis-menu-btn .dot {
+  width: 4px;
+  height: 4px;
+  background: rgba(200, 220, 255, 0.8);
+  border-radius: 50%;
+  margin: 2px 0;
+}
+
+#genesis-menu-btn:hover .dot {
+  background: #0cf;
+}
+
+/* ── Dropdown Panel ── */
+#genesis-menu-dropdown {
+  position: fixed;
+  top: 48px;
+  right: 8px;
+  z-index: 1001;
+  width: 240px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: rgba(8, 12, 24, 0.92);
+  border: 1px solid rgba(0, 200, 255, 0.18);
+  border-radius: 10px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 200, 255, 0.3);
+  display: none;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  padding: 6px 0;
+}
+
+#genesis-menu-dropdown.visible {
+  display: block;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ── Menu Items ── */
+.g-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  color: rgba(200, 215, 240, 0.9);
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+}
+
+.g-menu-item:hover {
+  background: rgba(0, 200, 255, 0.08);
+  color: #0cf;
+  border-left-color: #0cf;
+}
+
+.g-menu-item .g-menu-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  opacity: 0.7;
+}
+
+.g-menu-item:hover .g-menu-icon {
+  opacity: 1;
+}
+
+.g-menu-divider {
+  height: 1px;
+  margin: 4px 12px;
+  background: rgba(0, 200, 255, 0.1);
+}
+
+/* ── Scrollbar ── */
+#genesis-menu-dropdown::-webkit-scrollbar { width: 4px; }
+#genesis-menu-dropdown::-webkit-scrollbar-track { background: transparent; }
+#genesis-menu-dropdown::-webkit-scrollbar-thumb { background: rgba(0, 200, 255, 0.2); border-radius: 4px; }

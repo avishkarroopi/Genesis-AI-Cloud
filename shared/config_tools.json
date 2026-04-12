@@ -1,0 +1,6 @@
+{
+  "allow_shell": false,
+  "allow_file": true,
+  "allow_browser": true,
+  "allow_script": true
+}

@@ -1,0 +1,158 @@
+<<<<<<< HEAD
+{
+  "data": [
+    {
+      "updatedAt": "2026-03-12T17:31:16.210Z",
+      "createdAt": "2026-03-12T17:28:22.964Z",
+      "id": "gcg7JgeicEJWYJPK",
+      "name": "My workflow",
+      "active": false,
+      "isArchived": false,
+      "nodes": [
+        {
+          "parameters": {
+            "path": "ab969662-d32b-4016-8a7e-6977ff1e842a",
+            "options": {}
+          },
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            0,
+            0
+          ],
+          "id": "babd2b77-9209-4011-8be1-bff2a793e38e",
+          "name": "Webhook",
+          "webhookId": "ab969662-d32b-4016-8a7e-6977ff1e842a"
+        },
+        {
+          "parameters": {
+            "options": {}
+          },
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.5,
+          "position": [
+            208,
+            0
+          ],
+          "id": "e4dcc566-8c6d-4a79-ba12-2d68dc075f90",
+          "name": "Respond to Webhook"
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Respond to Webhook",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+      },
+      "staticData": null,
+      "meta": null,
+      "pinData": {},
+      "versionId": "1c885180-401c-41c9-9a83-447247805e64",
+      "activeVersionId": null,
+      "triggerCount": 0,
+      "shared": [
+        {
+          "updatedAt": "2026-03-12T17:28:22.971Z",
+          "createdAt": "2026-03-12T17:28:22.971Z",
+          "role": "workflow:owner",
+          "workflowId": "gcg7JgeicEJWYJPK",
+          "projectId": "CvYcXioIjvawmYZW"
+        }
+      ],
+      "activeVersion": null,
+      "tags": []
+    }
+  ],
+  "nextCursor": null
+=======
+{
+  "data": [
+    {
+      "updatedAt": "2026-03-12T17:31:16.210Z",
+      "createdAt": "2026-03-12T17:28:22.964Z",
+      "id": "gcg7JgeicEJWYJPK",
+      "name": "My workflow",
+      "active": false,
+      "isArchived": false,
+      "nodes": [
+        {
+          "parameters": {
+            "path": "ab969662-d32b-4016-8a7e-6977ff1e842a",
+            "options": {}
+          },
+          "type": "n8n-nodes-base.webhook",
+          "typeVersion": 2.1,
+          "position": [
+            0,
+            0
+          ],
+          "id": "babd2b77-9209-4011-8be1-bff2a793e38e",
+          "name": "Webhook",
+          "webhookId": "ab969662-d32b-4016-8a7e-6977ff1e842a"
+        },
+        {
+          "parameters": {
+            "options": {}
+          },
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.5,
+          "position": [
+            208,
+            0
+          ],
+          "id": "e4dcc566-8c6d-4a79-ba12-2d68dc075f90",
+          "name": "Respond to Webhook"
+        }
+      ],
+      "connections": {
+        "Webhook": {
+          "main": [
+            [
+              {
+                "node": "Respond to Webhook",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+      },
+      "staticData": null,
+      "meta": null,
+      "pinData": {},
+      "versionId": "1c885180-401c-41c9-9a83-447247805e64",
+      "activeVersionId": null,
+      "triggerCount": 0,
+      "shared": [
+        {
+          "updatedAt": "2026-03-12T17:28:22.971Z",
+          "createdAt": "2026-03-12T17:28:22.971Z",
+          "role": "workflow:owner",
+          "workflowId": "gcg7JgeicEJWYJPK",
+          "projectId": "CvYcXioIjvawmYZW"
+        }
+      ],
+      "activeVersion": null,
+      "tags": []
+    }
+  ],
+  "nextCursor": null
+>>>>>>> 403a9c7ee1b80b1dd1e601f317a1d34fb5d9d8a3
+}

@@ -1,0 +1,131 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GENESIS Scan Effect — Horizontal Scanning Line
+   Shows during THINKING / PROCESSING states.
+   Standalone CSS — does NOT touch any existing styles.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Container — full overlay over face area ── */
+#scan-effect {
+  position: absolute;
+  top: 15%;
+  left: 20%;
+  width: 60%;
+  height: 70%;
+  z-index: 4; /* Below hud-overlay elements (z:5-6), above canvas */
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+#scan-effect.scan-active {
+  opacity: 1;
+}
+
+/* ── Scanning line ── */
+.scan-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(0, 200, 255, 0.15) 15%,
+      rgba(0, 220, 255, 0.6) 50%,
+      rgba(0, 200, 255, 0.15) 85%,
+      transparent 100%);
+  box-shadow:
+    0 0 12px rgba(0, 200, 255, 0.4),
+    0 0 30px rgba(0, 150, 255, 0.15),
+    0 0 60px rgba(0, 100, 255, 0.05);
+  animation: scanMove 2.8s ease-in-out infinite;
+}
+
+@keyframes scanMove {
+  0%   { top: 0%; opacity: 0; }
+  5%   { opacity: 1; }
+  50%  { top: 100%; opacity: 0.8; }
+  55%  { opacity: 1; }
+  100% { top: 0%; opacity: 0; }
+}
+
+/* ── Subtle grid overlay for depth ── */
+.scan-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(0deg, rgba(0, 180, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 180, 255, 0.02) 1px, transparent 1px);
+  background-size: 3% 3%;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+#scan-effect.scan-active .scan-grid {
+  opacity: 0.5;
+}
+
+/* ── Corner brackets for targeting frame ── */
+.scan-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: rgba(0, 200, 255, 0.25);
+  border-style: solid;
+  border-width: 0;
+}
+
+.scan-corner.sc-tl {
+  top: 5%;
+  left: 5%;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.scan-corner.sc-tr {
+  top: 5%;
+  right: 5%;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.scan-corner.sc-bl {
+  bottom: 5%;
+  left: 5%;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.scan-corner.sc-br {
+  bottom: 5%;
+  right: 5%;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+/* ── PROCESSING mode — faster, orange tint ── */
+#scan-effect.scan-processing .scan-line {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 180, 0, 0.15) 15%,
+      rgba(255, 200, 0, 0.5) 50%,
+      rgba(255, 180, 0, 0.15) 85%,
+      transparent 100%);
+  box-shadow:
+    0 0 12px rgba(255, 180, 0, 0.3),
+    0 0 30px rgba(255, 140, 0, 0.1);
+  animation-duration: 1.8s;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  #scan-effect {
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+  }
+}

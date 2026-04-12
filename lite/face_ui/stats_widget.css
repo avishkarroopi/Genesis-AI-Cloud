@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GENESIS Stats Widget — CPU / RAM / GPU HUD
+   Standalone CSS — does NOT touch style.css or widget.css
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600&display=swap');
+
+/* ── Container ── */
+#stats-widget {
+  position: absolute;
+  bottom: 23%;
+  left: 19.5%;
+  width: 11vw;
+  transform: scale(1.15);
+  min-width: 140px;
+  padding: 1vw 1.2vw;
+  border-radius: 12px;
+  pointer-events: none;
+  z-index: 6;
+
+  background: rgba(10, 20, 35, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  box-shadow:
+    0 0 15px rgba(0, 140, 255, 0.08),
+    inset 0 0 20px rgba(0, 100, 200, 0.05);
+}
+
+/* ── Title ── */
+.sw-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.8vw;
+  color: rgba(0, 220, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  text-shadow: 0 0 8px rgba(0, 200, 255, 0.2);
+  margin-bottom: 0.6vw;
+  text-align: center;
+}
+
+/* ── Stat row ── */
+.sw-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45vw;
+}
+
+.sw-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  font-size: 0.8vw;
+  color: rgba(180, 210, 230, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  min-width: 2.5vw;
+}
+
+.sw-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  font-size: 0.8vw;
+  color: rgba(160, 220, 240, 0.7);
+  text-align: right;
+  min-width: 2.5vw;
+}
+
+/* ── Bar track ── */
+.sw-bar-track {
+  flex: 1;
+  height: 4px;
+  margin: 0 0.4vw;
+  background: rgba(0, 100, 150, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sw-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease-out;
+  width: 0%;
+}
+
+/* Color coding */
+.sw-bar-fill.sw-cpu {
+  background: linear-gradient(90deg, rgba(0, 200, 255, 0.6), rgba(0, 255, 200, 0.8));
+  box-shadow: 0 0 6px rgba(0, 200, 255, 0.3);
+}
+
+.sw-bar-fill.sw-ram {
+  background: linear-gradient(90deg, rgba(100, 200, 255, 0.6), rgba(0, 180, 255, 0.8));
+  box-shadow: 0 0 6px rgba(100, 200, 255, 0.3);
+}
+
+.sw-bar-fill.sw-gpu {
+  background: linear-gradient(90deg, rgba(0, 255, 180, 0.6), rgba(0, 220, 120, 0.8));
+  box-shadow: 0 0 6px rgba(0, 255, 180, 0.3);
+}
+
+/* High usage warning glow */
+.sw-bar-fill.sw-warn {
+  background: linear-gradient(90deg, rgba(255, 180, 0, 0.7), rgba(255, 100, 0, 0.9)) !important;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4) !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  #stats-widget {
+    width: 18vw;
+    padding: 1.5vw 1.8vw;
+  }
+
+  .sw-title {
+    font-size: 1.4vw;
+  }
+
+  .sw-label,
+  .sw-value {
+    font-size: 1vw;
+  }
+}

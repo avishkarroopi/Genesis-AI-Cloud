@@ -1,0 +1,169 @@
+{
+  "generated_at": "2026-04-10T20:40:00+05:30",
+  "description": "GENESIS project cleanup manifest. Lists all files to be removed with reasons.",
+  "safety_note": "Protected files and active data files are NOT included.",
+  "files": [
+    {
+      "path": "core/destroy_test.wav",
+      "size_kb": 93,
+      "reason": "Debug artifact WAV file — not used by any module"
+    },
+    {
+      "path": "core/reinit_test.wav",
+      "size_kb": 93,
+      "reason": "Debug artifact WAV file — not used by any module"
+    },
+    {
+      "path": "core/repro_test.wav",
+      "size_kb": 71,
+      "reason": "Debug artifact WAV file — not used by any module"
+    },
+    {
+      "path": "core/test_A.wav",
+      "size_kb": 82,
+      "reason": "Debug artifact WAV file — not used by any module"
+    },
+    {
+      "path": "core/test_B.wav",
+      "size_kb": 90,
+      "reason": "Debug artifact WAV file — not used by any module"
+    },
+    {
+      "path": "core/thread_test.wav",
+      "size_kb": 75,
+      "reason": "Debug artifact WAV file — not used by any module"
+    },
+    {
+      "path": "core/temp_audio.wav",
+      "size_kb": 196,
+      "reason": "Temporary TTS audio file — regenerated at runtime"
+    },
+    {
+      "path": "temp_audio.wav",
+      "size_kb": 145,
+      "reason": "Temporary TTS audio file at project root"
+    },
+    {
+      "path": "test_latency.wav",
+      "size_kb": 168,
+      "reason": "Latency test artifact — one-off diagnostic"
+    },
+    {
+      "path": "test_voice_loop.py",
+      "size_kb": 1,
+      "reason": "One-off voice loop test script"
+    },
+    {
+      "path": "tmp_verify.py",
+      "size_kb": 2,
+      "reason": "Temporary verification script from previous audit"
+    },
+    {
+      "path": "tmp_verify_emotion.py",
+      "size_kb": 2,
+      "reason": "Temporary emotion verification script from previous audit"
+    },
+    {
+      "path": "verify_final.py",
+      "size_kb": 4,
+      "reason": "One-off post-repair verification script"
+    },
+    {
+      "path": "verify_parallel.py",
+      "size_kb": 1,
+      "reason": "One-off parallel verification test"
+    },
+    {
+      "path": "verify_phase2.py",
+      "size_kb": 2,
+      "reason": "One-off Phase-2 verification script"
+    },
+    {
+      "path": "verify_rhubarb.py",
+      "size_kb": 1,
+      "reason": "One-off Rhubarb lip-sync verification script"
+    },
+    {
+      "path": "core/test_mic.py",
+      "size_kb": 1,
+      "reason": "One-off microphone test script"
+    },
+    {
+      "path": "error.txt",
+      "size_kb": 1,
+      "reason": "Old error dump — stale diagnostic output"
+    },
+    {
+      "path": "tree.txt",
+      "size_kb": 58,
+      "reason": "Stale directory tree snapshot"
+    },
+    {
+      "path": "tree_final.txt",
+      "size_kb": 59,
+      "reason": "Stale directory tree snapshot"
+    },
+    {
+      "path": "diagnostic_results.json",
+      "size_kb": 2,
+      "reason": "Stale diagnostic output from previous run"
+    },
+    {
+      "path": "val_output.json",
+      "size_kb": 1,
+      "reason": "Stale validation output from previous run"
+    },
+    {
+      "path": "tmp/audit_notes.md",
+      "size_kb": 1,
+      "reason": "Temporary audit notes from previous session"
+    },
+    {
+      "path": "tmp/diagnostic_script.py",
+      "size_kb": 7,
+      "reason": "One-off diagnostic script"
+    },
+    {
+      "path": "tmp/inject_owner.py",
+      "size_kb": 3,
+      "reason": "Owner data injection script — already executed"
+    },
+    {
+      "path": "tmp/latency_test.py",
+      "size_kb": 3,
+      "reason": "One-off latency benchmark script"
+    },
+    {
+      "path": "tmp/model_test.py",
+      "size_kb": 2,
+      "reason": "One-off model test script"
+    },
+    {
+      "path": "tmp/pipeline_test.py",
+      "size_kb": 1,
+      "reason": "One-off pipeline test script"
+    },
+    {
+      "path": "tmp/test_api.py",
+      "size_kb": 1,
+      "reason": "One-off API test script"
+    },
+    {
+      "path": "yolov8n.pt",
+      "size_kb": 6396,
+      "reason": "Duplicate YOLOv8 model — identical copy exists in shared/yolov8n.pt"
+    }
+  ],
+  "total_files": 30,
+  "total_size_kb_approx": 7575,
+  "preserved_files": [
+    "validate_genesis.py — useful system validator (KEPT)",
+    "shared/genesis_memory.json — active memory (KEPT)",
+    "shared/experience_memory.json — active experience (KEPT)",
+    "shared/workflows.json — active workflows (KEPT)",
+    "shared/config_tools.json — active config (KEPT)",
+    "logs/security.log — active log (KEPT)",
+    "tools/rhubarb/ — external binary and test resources (KEPT)",
+    "All core/, body/, lite/ source files (KEPT)"
+  ]
+}
