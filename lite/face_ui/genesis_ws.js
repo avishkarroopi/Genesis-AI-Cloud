@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  const WS_URL = "wss://genesis-ai-cloud-production.up.railway.app/ws/voice?token=test_token";
+  const WS_URL = "wss://genesis-ai-cloud-production.up.railway.app/ws/voice";
   const RECONNECT_INTERVAL = 3000; // ms
 
   // HUD DOM elements — resolved lazily after DOM loads
