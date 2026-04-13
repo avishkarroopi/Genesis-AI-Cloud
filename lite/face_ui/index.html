@@ -19,6 +19,43 @@
       height: 100vh;
       object-fit: contain;
     }
+
+    .hidden { display: none !important; }
+
+    /* ═══ Splash Screen ═══ */
+    #splashScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #000; z-index: 20000;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      color: #0ff; font-family: 'Segoe UI', sans-serif;
+    }
+    #splashScreen h1 {
+      font-size: 64px; letter-spacing: 12px; margin: 0;
+      text-shadow: 0 0 30px rgba(0,255,255,0.6);
+    }
+    #splashScreen p {
+      font-size: 18px; color: #888; margin-top: 20px; letter-spacing: 4px;
+    }
+
+    /* ═══ Login Screen ═══ */
+    #loginScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #000; z-index: 19000;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      color: #0ff; font-family: 'Segoe UI', sans-serif;
+    }
+    #loginScreen h1 {
+      font-size: 28px; letter-spacing: 6px; margin-bottom: 40px;
+      text-shadow: 0 0 15px rgba(0,255,255,0.4);
+    }
+    #loginScreen button {
+      padding: 18px 50px; font-size: 22px;
+      border: 2px solid #0ff; background: transparent; color: #0ff;
+      cursor: pointer; letter-spacing: 3px; transition: all 0.3s;
+    }
+    #loginScreen button:hover {
+      background: rgba(0,255,255,0.15); box-shadow: 0 0 20px rgba(0,255,255,0.4);
+    }
   </style>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="widget.css">
@@ -28,153 +65,194 @@
   <link rel="stylesheet" href="splash.css">
   <link rel="stylesheet" href="menu.css">
   <link rel="stylesheet" href="pages.css">
+
+  <!-- Scripts loaded but NOT executed until auth completes -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script type="module" src="face.js"></script>
-  <script src="genesis_ws.js"></script>
-  <script src="widget.js"></script>
-  <script src="stats_widget.js"></script>
-  <script src="waveform.js"></script>
-  <script src="scan_effect.js"></script>
-  <script src="splash.js"></script>
-  <script src="menu.js"></script>
-  <script src="pages.js"></script>
+  <script src="mic_capture.js"></script>
   <script src="camera_capture.js"></script>
   <script src="vision_engine.js"></script>
-  
-  <!-- Firebase Auth CDN -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    
-    const firebaseConfig = {
-      apiKey: "dummy-api-key-for-ui", // Replace in real env
-      authDomain: "genesis-ai.firebaseapp.com",
-    };
-    
-    // Stub auth sequence for demo since we don't have valid keys
-    window.startGenesisSystem = function() {
-        document.getElementById("login-screen").style.display = "none";
-        
-        // Pass a dummy or verified token to genesis_ws
-        window.genesisFirebaseToken = "test_token"; // Matches server's dev bypass token
-        
-        // Automatically start Mic sequence if button exists
-        if (window.startMicrophoneStreaming) {
-            window.startMicrophoneStreaming();
-        }
-        
-        // Launch genesis WS connect manually
-        if (window.genesisWsConnect) {
-            window.genesisWsConnect();
-        }
-    };
-  </script>
+  <script src="genesis_ws.js"></script>
 </head>
 
 <body>
-  <!-- ═══ LOGIN SCREEN ═══ -->
-  <div id="login-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#0ff; font-family:sans-serif;">
-     <h1>GENESIS SECURE AUTHENTICATION</h1>
-     <button onclick="window.startGenesisSystem()" style="padding:15px; font-size:20px; border:2px solid #0ff; background:transparent; color:#0ff; cursor:pointer;">START GENESIS (Login)</button>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 1: SPLASH (visible on load, auto-hides after 2s)          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div id="splashScreen">
+    <h1>GENESIS</h1>
+    <p>Initializing Systems...</p>
   </div>
-  <!-- ═══ UI CONTROLS ═══ -->
-  <button id="startVoice" style="position:absolute; top:20px; left:20px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.2); color: #0ff; outline: none; border: 1px solid #0ff; cursor: pointer; border-radius: 5px;">Re-Start Voice</button>
-  <button id="cameraToggle" style="position:absolute; top:20px; left:140px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.1); color: gray; outline: none; border: 1px solid gray; cursor: pointer; border-radius: 5px;">Camera OFF</button>
-  <script>
-    document.getElementById("startVoice").onclick = window.startMicrophoneStreaming;
-    document.getElementById("cameraToggle").onclick = function() {
-        if(window.toggleCamera) window.toggleCamera();
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 2: LOGIN (shown after splash, hidden after auth)          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div id="loginScreen" class="hidden">
+    <h1>GENESIS SECURE AUTHENTICATION</h1>
+    <button id="startGenesisBtn">START GENESIS</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN 3: GENESIS UI (hidden until auth succeeds)                -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div id="genesisUI" class="hidden">
+
+    <!-- UI CONTROLS -->
+    <button id="startVoice" style="position:absolute; top:20px; left:20px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.2); color: #0ff; outline: none; border: 1px solid #0ff; cursor: pointer; border-radius: 5px;">Re-Start Voice</button>
+    <button id="cameraToggle" style="position:absolute; top:20px; left:160px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.1); color: gray; outline: none; border: 1px solid gray; cursor: pointer; border-radius: 5px;">Camera OFF</button>
+
+    <!-- GENESIS MENU -->
+    <div id="genesis-menu-btn" title="GENESIS Menu">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+    <div id="genesis-menu-dropdown">
+      <div class="g-menu-item" data-page="home_connect"><span class="g-menu-icon">🏠</span>Home Connect</div>
+      <div class="g-menu-item" data-page="body_connect"><span class="g-menu-icon">🤖</span>Body Connect</div>
+      <div class="g-menu-item" data-page="health_connect"><span class="g-menu-icon">🩺</span>Health Connect</div>
+      <div class="g-menu-divider"></div>
+      <div class="g-menu-item" data-page="memory"><span class="g-menu-icon">🧠</span>Memory</div>
+      <div class="g-menu-item" data-page="voice_settings"><span class="g-menu-icon">🎙️</span>Voice Settings</div>
+      <div class="g-menu-item" data-page="emotion_settings"><span class="g-menu-icon">😊</span>Emotion Settings</div>
+      <div class="g-menu-divider"></div>
+      <div class="g-menu-item" data-page="system_status"><span class="g-menu-icon">📊</span>System Status</div>
+      <div class="g-menu-item" data-page="device_permissions"><span class="g-menu-icon">🔒</span>Device Permissions</div>
+      <div class="g-menu-item" data-page="developer_mode"><span class="g-menu-icon">⚙️</span>Developer Mode</div>
+      <div class="g-menu-divider"></div>
+      <div class="g-menu-item" data-page="privacy"><span class="g-menu-icon">🛡️</span>Privacy &amp; Data Control</div>
+      <div class="g-menu-item" data-page="owner_info"><span class="g-menu-icon">👤</span>Owner Information</div>
+      <div class="g-menu-divider"></div>
+      <div class="g-menu-item" data-page="updates"><span class="g-menu-icon">🔄</span>Updates</div>
+      <div class="g-menu-item" data-page="about"><span class="g-menu-icon">ℹ️</span>About Genesis</div>
+    </div>
+
+    <!-- PAGE OVERLAY CONTAINER -->
+    <div id="genesis-page-overlay"></div>
+
+    <div id="loader"
+      style="position: absolute; color: #0df; font-family: sans-serif; font-size: 40px; text-align: center; width: 100%; top: 45%; z-index: 10;">
+      Initializing GENESIS System...<br>
+      <span id="loadText" style="font-size: 24px; color: #aaa;">Loading MediaPipe Models</span>
+    </div>
+    <canvas id="faceCanvas"></canvas>
+    <canvas id="threeCanvas" style="position: absolute; top:0; left:0; z-index:2; pointer-events:none;"></canvas>
+
+    <!-- Dynamic HUD text overlays -->
+    <div id="hud-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;">
+      <span id="g-status"
+        style="position:absolute;top:10.8%;right:20.3%;font:bold 1.4vw 'Aperture',sans-serif;color:#c8ced6;"></span>
+      <!-- Icon Status Row -->
+      <div id="icon-status-row"
+        style="position:absolute;top:16%;left:74%;display:flex;gap:1vw;align-items:center;z-index:6;opacity:1;padding:4px 8px;background:rgba(0,150,255,0.08);border:1px solid rgba(0,255,255,0.6);border-radius:6px;box-shadow:0 0 8px rgba(0,255,255,0.5);backdrop-filter:blur(4px);">
+        <span id="g-network-icon" class="icon-active"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
+            height="2vw" viewBox="0 0 24 24">
+            <path
+              d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 9C5.5 7.12 8.62 6 12 6s6.5 1.12 9 3l1.8-2.4C19.79 4.34 16.05 3 12 3zm0 4.5c-2.46 0-4.72.68-6.6 1.85L7.2 11.9C8.6 11.02 10.23 10.5 12 10.5s3.4.52 4.8 1.4l1.8-2.55C16.72 8.18 14.46 7.5 12 7.5zm0 4.5c-1.04 0-2.01.24-2.88.66L12 16.5l2.88-3.84c-.87-.42-1.84-.66-2.88-.66z" />
+          </svg></span>
+        <span id="g-voice-icon" class="icon-idle"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
+            height="2vw" viewBox="0 0 24 24">
+            <path
+              d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+          </svg></span>
+        <span id="g-mic-icon" class="icon-active"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
+            height="2vw" viewBox="0 0 24 24">
+            <path
+              d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z" />
+          </svg></span>
+        <span id="g-camera-icon" class="icon-off"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
+            height="2vw" viewBox="0 0 24 24">
+            <path
+              d="M15 12c0 1.65-1.35 3-3 3s-3-1.35-3-3 1.35-3 3-3 3 1.35 3 3zm7-6h-3.17L17 4H7L5.17 6H2v14h20V6zm-10 11c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
+          </svg></span>
+      </div>
+      <span id="g-state"
+        style="position:absolute;top:48%;right:25%;font:bold 1.5vw 'Aperture',sans-serif;color:#c8ced6;"></span>
+      <!-- Clock Widget Overlay -->
+      <div id="clock-widget"></div>
+      <!-- Stats Widget Overlay -->
+      <div id="stats-widget"></div>
+      <!-- Voice Waveform Overlay -->
+      <div id="waveform-hud"></div>
+      <!-- Scan Effect Overlay -->
+      <div id="scan-effect"></div>
+    </div>
+
+  </div><!-- END #genesisUI -->
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- SCREEN STATE MACHINE + AUTH INITIALIZATION                       -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "dummy-api-key-for-ui",
+      authDomain: "genesis-ai.firebaseapp.com",
     };
+
+    // ── Screen references ──
+    const splashScreen = document.getElementById("splashScreen");
+    const loginScreen  = document.getElementById("loginScreen");
+    const genesisUI    = document.getElementById("genesisUI");
+
+    function showOnly(screen) {
+      splashScreen.classList.add("hidden");
+      loginScreen.classList.add("hidden");
+      genesisUI.classList.add("hidden");
+      screen.classList.remove("hidden");
+    }
+
+    // ── STEP 1: Splash → Login after 2000ms ──
+    setTimeout(() => {
+      showOnly(loginScreen);
+    }, 2000);
+
+    // ── STEP 2: Login button triggers auth + Genesis boot ──
+    document.getElementById("startGenesisBtn").addEventListener("click", function() {
+      // Set Firebase token for WS handshake (dev bypass)
+      window.genesisFirebaseToken = "test_token";
+
+      // Hide login, show Genesis UI
+      showOnly(genesisUI);
+
+      // Load face.js module dynamically only AFTER auth
+      const faceScript = document.createElement("script");
+      faceScript.type = "module";
+      faceScript.src = "face.js";
+      document.head.appendChild(faceScript);
+
+      // Load supporting UI scripts
+      const uiScripts = ["widget.js", "stats_widget.js", "waveform.js", "scan_effect.js", "splash.js", "menu.js", "pages.js"];
+      uiScripts.forEach(src => {
+        const s = document.createElement("script");
+        s.src = src;
+        document.head.appendChild(s);
+      });
+
+      // Initialize WebSocket connection
+      if (window.genesisWsConnect) {
+        window.genesisWsConnect();
+      }
+
+      // Initialize microphone capture
+      if (window.startMicrophoneStreaming) {
+        window.startMicrophoneStreaming();
+      }
+
+      // Wire camera toggle button
+      document.getElementById("cameraToggle").onclick = function() {
+        if (window.toggleCamera) window.toggleCamera();
+      };
+
+      // Wire re-start voice button
+      document.getElementById("startVoice").onclick = function() {
+        if (window.startMicrophoneStreaming) window.startMicrophoneStreaming();
+      };
+    });
   </script>
 
-  <!-- ═══ GENESIS SPLASH SCREEN ═══ -->
-  <div id="genesis-splash">
-    <div class="splash-title">GENESIS</div>
-    <div class="splash-subtitle">SYNTHETIC INTELLIGENCE</div>
-    <div class="splash-logo-container">
-      <img src="assets/genesis_logo.png" alt="GENESIS">
-      <div class="splash-logo-glow"></div>
-    </div>
-    <div class="splash-status">Initializing Genesis Systems...</div>
-    <div class="splash-circles"></div>
-  </div>
-
-  <!-- ═══ GENESIS MENU ═══ -->
-  <div id="genesis-menu-btn" title="GENESIS Menu">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">
-      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    </div>
-  </div>
-  <div id="genesis-menu-dropdown">
-    <div class="g-menu-item" data-page="home_connect"><span class="g-menu-icon">🏠</span>Home Connect</div>
-    <div class="g-menu-item" data-page="body_connect"><span class="g-menu-icon">🤖</span>Body Connect</div>
-    <div class="g-menu-item" data-page="health_connect"><span class="g-menu-icon">🩺</span>Health Connect</div>
-    <div class="g-menu-divider"></div>
-    <div class="g-menu-item" data-page="memory"><span class="g-menu-icon">🧠</span>Memory</div>
-    <div class="g-menu-item" data-page="voice_settings"><span class="g-menu-icon">🎙️</span>Voice Settings</div>
-    <div class="g-menu-item" data-page="emotion_settings"><span class="g-menu-icon">😊</span>Emotion Settings</div>
-    <div class="g-menu-divider"></div>
-    <div class="g-menu-item" data-page="system_status"><span class="g-menu-icon">📊</span>System Status</div>
-    <div class="g-menu-item" data-page="device_permissions"><span class="g-menu-icon">🔒</span>Device Permissions</div>
-    <div class="g-menu-item" data-page="developer_mode"><span class="g-menu-icon">⚙️</span>Developer Mode</div>
-    <div class="g-menu-divider"></div>
-    <div class="g-menu-item" data-page="privacy"><span class="g-menu-icon">🛡️</span>Privacy &amp; Data Control</div>
-    <div class="g-menu-item" data-page="owner_info"><span class="g-menu-icon">👤</span>Owner Information</div>
-    <div class="g-menu-divider"></div>
-    <div class="g-menu-item" data-page="updates"><span class="g-menu-icon">🔄</span>Updates</div>
-    <div class="g-menu-item" data-page="about"><span class="g-menu-icon">ℹ️</span>About Genesis</div>
-  </div>
-
-  <!-- ═══ PAGE OVERLAY CONTAINER ═══ -->
-  <div id="genesis-page-overlay"></div>
-
-  <div id="loader"
-    style="position: absolute; color: #0df; font-family: sans-serif; font-size: 40px; text-align: center; width: 100%; top: 45%; z-index: 10;">
-    Initializing GENESIS System...<br>
-    <span id="loadText" style="font-size: 24px; color: #aaa;">Loading MediaPipe Models</span>
-  </div>
-  <canvas id="faceCanvas"></canvas>
-  <canvas id="threeCanvas" style="position: absolute; top:0; left:0; z-index:2; pointer-events:none;"></canvas>
-
-  <!-- Dynamic HUD text overlays — positioned over the baked UI, DOM-only updates, no canvas drawing -->
-  <div id="hud-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;">
-    <span id="g-status"
-      style="position:absolute;top:10.8%;right:20.3%;font:bold 1.4vw 'Aperture',sans-serif;color:#c8ced6;"></span>
-    <!-- Icon Status Row (Replaces left text block) -->
-    <div id="icon-status-row"
-      style="position:absolute;top:16%;left:74%;display:flex;gap:1vw;align-items:center;z-index:6;opacity:1;padding:4px 8px;background:rgba(0,150,255,0.08);border:1px solid rgba(0,255,255,0.6);border-radius:6px;box-shadow:0 0 8px rgba(0,255,255,0.5);backdrop-filter:blur(4px);">
-      <span id="g-network-icon" class="icon-active"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
-          height="2vw" viewBox="0 0 24 24">
-          <path
-            d="M12 3C7.95 3 4.21 4.34 1.2 6.6L3 9C5.5 7.12 8.62 6 12 6s6.5 1.12 9 3l1.8-2.4C19.79 4.34 16.05 3 12 3zm0 4.5c-2.46 0-4.72.68-6.6 1.85L7.2 11.9C8.6 11.02 10.23 10.5 12 10.5s3.4.52 4.8 1.4l1.8-2.55C16.72 8.18 14.46 7.5 12 7.5zm0 4.5c-1.04 0-2.01.24-2.88.66L12 16.5l2.88-3.84c-.87-.42-1.84-.66-2.88-.66z" />
-        </svg></span>
-      <span id="g-voice-icon" class="icon-idle"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
-          height="2vw" viewBox="0 0 24 24">
-          <path
-            d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-        </svg></span>
-      <span id="g-mic-icon" class="icon-active"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
-          height="2vw" viewBox="0 0 24 24">
-          <path
-            d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z" />
-        </svg></span>
-      <span id="g-camera-icon" class="icon-off"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
-          height="2vw" viewBox="0 0 24 24">
-          <path
-            d="M15 12c0 1.65-1.35 3-3 3s-3-1.35-3-3 1.35-3 3-3 3 1.35 3 3zm7-6h-3.17L17 4H7L5.17 6H2v14h20V6zm-10 11c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
-        </svg></span>
-    </div>
-    <span id="g-state"
-      style="position:absolute;top:48%;right:25%;font:bold 1.5vw 'Aperture',sans-serif;color:#c8ced6;"></span>
-    <!-- Clock Widget Overlay -->
-    <div id="clock-widget"></div>
-    <!-- Stats Widget Overlay -->
-    <div id="stats-widget"></div>
-    <!-- Voice Waveform Overlay -->
-    <div id="waveform-hud"></div>
-    <!-- Scan Effect Overlay -->
-    <div id="scan-effect"></div>
-  </div>
 </body>
 
 </html>
