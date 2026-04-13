@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  const WS_URL = `ws://${location.host}/ws`;
+  const WS_URL = `ws://${location.host}/ws/voice`;
   const RECONNECT_INTERVAL = 3000; // ms
 
   // HUD DOM elements — resolved lazily after DOM loads

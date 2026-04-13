@@ -13,15 +13,22 @@ import sys
 import shutil
 import threading
 import queue
-import sounddevice as sd
-import soundfile as sf
+CLOUD_MODE = os.environ.get("CLOUD_MODE", "false").lower() == "true"
 
-try:
-    import pyttsx3
-    _PYTTSX3_OK = True
-except Exception as e:
+if not CLOUD_MODE:
+    import sounddevice as sd
+    import soundfile as sf
+    try:
+        import pyttsx3
+        _PYTTSX3_OK = True
+    except Exception as e:
+        _PYTTSX3_OK = False
+        print(f"[VOICE_AGENT] pyttsx3 not available: {e}", file=sys.stderr, flush=True)
+else:
+    sd = None
+    sf = None
     _PYTTSX3_OK = False
-    print(f"[VOICE_AGENT] pyttsx3 not available: {e}", file=sys.stderr, flush=True)
+    print("[VOICE_AGENT] Cloud mode active — local pyttsx3 disabled.", flush=True)
 
 # Piper TTS is only available if the actual executable exists on disk
 PIPER_AVAILABLE = False

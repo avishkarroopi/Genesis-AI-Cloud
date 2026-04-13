@@ -220,6 +220,18 @@ def route_ai_request(prompt, owner_address="Sir", user_command=None, stream=Fals
 
         if intent == "AUTOMATION":
             import json
+
+            # ── [COGNITIVE LAYER] Digital Twin pre-simulation ──────────────
+            # Simulate the automation action through the DigitalTwin before
+            # committing to execution. Non-blocking — simulation failures are logged only.
+            try:
+                from core.digital_twin.behavior_simulator import BehaviorSimulator
+                sim = BehaviorSimulator()
+                sim.simulate({"action": "automation", "command": user_command})
+                print(f"[ROUTER] Digital Twin simulation OK for: {user_command[:60]}", flush=True)
+            except Exception as e:
+                print(f"[ROUTER] Digital Twin simulation skipped: {e}", flush=True)
+
             payload = {
                 "action": "automation",
                 "command": user_command
@@ -236,7 +248,7 @@ def route_ai_request(prompt, owner_address="Sir", user_command=None, stream=Fals
         except ImportError:
             face_bridge = None
 
-        # Research augmentation for RESEARCH intent
+        # ── [COGNITIVE LAYER] Research augmentation ───────────────────────────────
         if intent == "RESEARCH":
             try:
                 from core.research.research_engine import search_and_summarize
@@ -250,6 +262,20 @@ def route_ai_request(prompt, owner_address="Sir", user_command=None, stream=Fals
                 augmented_prompt = prompt
         else:
             augmented_prompt = prompt
+
+        # ── [COGNITIVE LAYER] Creativity Engine augmentation ──────────────────
+        # Runs on RESEARCH / REASONING intents to inject a creative angle that
+        # pushes the LLM beyond generic answers.
+        if intent in ("RESEARCH", "REASONING"):
+            try:
+                from core.creativity_engine import get_creativity_engine
+                c_engine = get_creativity_engine()
+                innovation_hint = c_engine.get_innovation_prompt(domain=intent.lower())
+                if innovation_hint:
+                    augmented_prompt = f"{augmented_prompt}\n\n[Creative Perspective]: {innovation_hint}"
+                    print(f"[ROUTER] Creativity Engine augmented prompt.", flush=True)
+            except Exception:
+                pass  # Non-blocking — creativity is additive, never required
 
         # Keys
         groq_key = GROQ_API_KEY or os.environ.get("GROQ_API_KEY")
@@ -450,14 +476,32 @@ def route_ai_request(prompt, owner_address="Sir", user_command=None, stream=Fals
         return res if res else "Yes?"
 
     # Run the blocking HTTP calls in a worker thread
+    import time
+    start_time = time.time()
     future = _router_pool.submit(_do_route)
     try:
-        return future.result(timeout=35)
+        res = future.result(timeout=35)
+        try:
+            from core.ai_telemetry.reasoning_metrics import track_reasoning
+            latency_ms = int((time.time() - start_time) * 1000)
+            track_reasoning(intent=intent, latency_ms=latency_ms, success=bool(res and res != "Yes?"))
+        except Exception:
+            pass
+        return res
     except TimeoutError:
         print("[ROUTER] Thread timeout: request took too long", flush=True)
+        try:
+            from core.ai_telemetry.reasoning_metrics import track_reasoning
+            track_reasoning(intent=intent, latency_ms=35000, success=False)
+        except Exception: pass
         return "Yes?"
     except Exception as e:
         print(f"[ROUTER] Thread error: {e}", flush=True)
+        try:
+            from core.ai_telemetry.reasoning_metrics import track_reasoning
+            latency_ms = int((time.time() - start_time) * 1000)
+            track_reasoning(intent=intent, latency_ms=latency_ms, success=False)
+        except Exception: pass
         return "Yes?"
 
 

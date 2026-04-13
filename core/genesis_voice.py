@@ -1,6 +1,14 @@
-import sounddevice as sd  # type: ignore
-import numpy as np  # type: ignore
 import os
+CLOUD_MODE = os.environ.get("CLOUD_MODE", "false").lower() == "true"
+
+if not CLOUD_MODE:
+    import sounddevice as sd  # type: ignore
+    import soundfile as sf  # type: ignore
+else:
+    sd = None
+    sf = None
+
+import numpy as np  # type: ignore
 import datetime
 import time
 import io
@@ -15,7 +23,6 @@ try:
     from faster_whisper import WhisperModel  # type: ignore
 except ImportError:
     pass
-import soundfile as sf  # type: ignore
 
 from core.config import *  # type: ignore
 
@@ -77,6 +84,10 @@ class SoundDeviceMic:
         self.noise_floor = 0.0
 
     def listen_in_background(self, callback):
+        if CLOUD_MODE:
+            print("[MIC] Cloud mode active. Microphone disabled.", flush=True)
+            return self.stop_listening
+
         if self.stream is not None and self.stream.active:
             print("[MIC] Stream already running, skipping duplicate start.", flush=True)
             return self.stop_listening

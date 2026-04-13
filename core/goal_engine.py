@@ -15,7 +15,8 @@ from core.event_bus import get_event_bus
 
 logger = logging.getLogger(__name__)
 
-GOALS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "shared", "goals.json")
+# Replaced local file storage with PostgreSQL for cloud statelessness
+from core.db_pool import get_connection, release_connection
 
 
 class Goal:
@@ -76,7 +77,7 @@ class GoalEngine:
             goal = Goal(goal_id=goal_id, description=description,
                         priority=priority, metadata=metadata)
             self._goals[goal_id] = goal
-            self._save_to_disk()
+            self._save_to_db(goal)
 
         bus = get_event_bus()
         if bus:
@@ -100,7 +101,7 @@ class GoalEngine:
             if progress is not None:
                 goal.progress = max(0.0, min(1.0, progress))
             goal.updated_at = datetime.now().isoformat()
-            self._save_to_disk()
+            self._save_to_db(goal)
 
         bus = get_event_bus()
         if bus:
@@ -130,7 +131,7 @@ class GoalEngine:
                 goal.steps = steps
                 goal.status = "active"
                 goal.updated_at = datetime.now().isoformat()
-                self._save_to_disk()
+                self._save_to_db(goal)
 
             logger.info(f"[GOAL] Scheduled {len(steps)} tasks for {goal_id}")
             return plan
@@ -174,28 +175,60 @@ class GoalEngine:
     # Persistence
     # ------------------------------------------------------------------
 
-    def _save_to_disk(self):
-        """Save goals to JSON (called under lock)."""
+    def _save_to_db(self, goal: Goal):
+        """Save a single goal to PostgreSQL (called under lock)."""
+        conn = get_connection()
+        if not conn:
+            return
+            
         try:
-            data = {gid: g.to_dict() for gid, g in self._goals.items()}
-            os.makedirs(os.path.dirname(GOALS_FILE), exist_ok=True)
-            with open(GOALS_FILE, "w") as f:
-                json.dump(data, f, indent=2)
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS goals (
+                        goal_id VARCHAR(255) PRIMARY KEY,
+                        data JSONB NOT NULL
+                    )
+                """)
+                cur.execute("""
+                    INSERT INTO goals (goal_id, data)
+                    VALUES (%s, %s)
+                    ON CONFLICT (goal_id)
+                    DO UPDATE SET data = %s
+                """, (goal.goal_id, json.dumps(goal.to_dict()), json.dumps(goal.to_dict())))
+            conn.commit()
         except Exception as e:
-            logger.error(f"[GOAL] Failed to save goals: {e}")
+            logger.error(f"[GOAL] Failed to save goal to DB: {e}")
+        finally:
+            release_connection(conn)
 
     def _load_from_disk(self):
-        """Load goals from JSON."""
+        """Migrated: Load goals from PostgreSQL upon boot."""
+        conn = get_connection()
+        if not conn:
+            return
+            
         try:
-            if os.path.exists(GOALS_FILE):
-                with open(GOALS_FILE, "r") as f:
-                    data = json.load(f)
-                for gid, gdata in data.items():
-                    self._goals[gid] = Goal.from_dict(gdata)
-                    self._counter = max(self._counter, int(gid.split("_")[1]) if "_" in gid else 0)
-                logger.info(f"[GOAL] Loaded {len(self._goals)} goals from disk")
+            with conn.cursor() as cur:
+                # Ensure table exists first so we don't crash on select
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS goals (
+                        goal_id VARCHAR(255) PRIMARY KEY,
+                        data JSONB NOT NULL
+                    )
+                """)
+                cur.execute("SELECT goal_id, data FROM goals")
+                rows = cur.fetchall()
+                
+                for row in rows:
+                    goal_id, gdata = row
+                    self._goals[goal_id] = Goal.from_dict(gdata)
+                    self._counter = max(self._counter, int(goal_id.split("_")[1]) if "_" in goal_id else 0)
+                
+                logger.info(f"[GOAL] Loaded {len(self._goals)} goals from DB")
         except Exception as e:
-            logger.error(f"[GOAL] Failed to load goals: {e}")
+            logger.error(f"[GOAL] Failed to load goals from DB: {e}")
+        finally:
+            release_connection(conn)
 
 
 # --------------- Module-level singleton ---------------

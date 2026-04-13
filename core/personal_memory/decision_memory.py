@@ -1,18 +1,11 @@
-"""
-Decision Memory (Phase-2 User Intelligence)
-Stores and retrieves user decisions via the unified memory backend.
-Constraint 4: Uses memory_manager.py for all database needs.
-"""
+# GENESIS Phase-3 Cognitive Module — currently passive.
 
-import json
-from datetime import datetime
-from core.memory.memory_manager import store_user_memory, search_memory
+class DecisionMemory:
+    def __init__(self, *args, **kwargs):
+        pass
 
-def record_decision(decision: str, reason: str, alternatives: list):
-    """Record a decision in the unified memory store."""
-    text_entry = f"[Decision] {decision}. Reason: {reason}. Alternatives considered: {', '.join(alternatives)}."
-    return store_user_memory(text_entry)
-
-def recall_decisions(query: str):
-    """Recall decisions matching query."""
-    return search_memory(f"[Decision] {query}")
+    def evaluate(self, decision=None, *args, **kwargs):
+        return decision
+        
+    def process(self, data=None, *args, **kwargs):
+        return data

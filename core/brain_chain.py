@@ -20,7 +20,11 @@ except ImportError:
 
 from core.ai_router import route_ai_request  # type: ignore
 from core.config import *  # type: ignore
-from body import screen_control  # type: ignore
+
+try:
+    from body import screen_control  # type: ignore
+except ImportError:
+    screen_control = None  # Not available in cloud mode
 
 try:
     from core import automation_engine  # type: ignore
@@ -30,7 +34,7 @@ except ImportError:
 try:
     from body import robot_control  # type: ignore
 except ImportError:
-    robot_control = None
+    robot_control = None  # Not available in cloud / server mode
 
 from core import genesis_tools
 from core.memory.memory_manager import get_user_name, set_user_name, store_entity, get_entities, load_memory, get_all_memory, get_memory_key, set_memory_key
@@ -722,6 +726,25 @@ try:
     print("[BRAIN] Cognitive loop daemon started", flush=True)
 except Exception as e:
     print(f"[BRAIN] Cognitive loop start failed (non-fatal): {e}", flush=True)
+
+# --- Phase-3: Start Awareness Engine daemon ---
+# The Awareness Engine monitors GoalQueue + WorldModel and emits proactive
+# GOAL_TRIGGERED events on the Event Bus, closing the cognition feedback loop.
+try:
+    from core.awareness.awareness_loop import start_awareness_loop
+    start_awareness_loop()
+    print("[BRAIN] Awareness Engine started", flush=True)
+except Exception as e:
+    print(f"[BRAIN] Awareness loop start failed (non-fatal): {e}", flush=True)
+
+# --- Phase-4: Start Self-Improvement daemon ---
+# Monitors Intelligence Bus for reasoning traces to orchestrate learning loops
+try:
+    from core.self_improvement.self_improvement_engine import start_self_improvement_daemon
+    start_self_improvement_daemon()
+    print("[BRAIN] Self-Improvement Engine started", flush=True)
+except Exception as e:
+    print(f"[BRAIN] Self-Improvement daemon start failed (non-fatal): {e}", flush=True)
 
 print("REALTIME MODE ACTIVE", flush=True)
 print("VOICE FIXED", flush=True)
