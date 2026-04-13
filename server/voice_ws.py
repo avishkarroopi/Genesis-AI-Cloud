@@ -87,10 +87,25 @@ async def voice_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            data = await websocket.receive_bytes()
-            response = await process_audio_chunk(data, session_context)
-            if response:
-                await websocket.send_text(response)
+            message = await websocket.receive()
+            if "bytes" in message:
+                response = await process_audio_chunk(message["bytes"], session_context)
+                if response:
+                    await websocket.send_text(response)
+            elif "text" in message:
+                try:
+                    payload = json.loads(message["text"])
+                    if payload.get("type") == "VISION_EVENT":
+                        try:
+                            from core.event_bus import get_event_bus
+                            import asyncio
+                            bus = get_event_bus()
+                            if bus:
+                                asyncio.create_task(bus.publish("VISION_EVENT", "frontend_camera", payload))
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
     except WebSocketDisconnect:
         manager.disconnect(websocket)
     except Exception as e:

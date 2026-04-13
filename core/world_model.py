@@ -227,6 +227,11 @@ class WorldModel:
     async def _on_vision(self, event_type: str, source: str, data: Any):
         try:
             self.world_state["vision"] = data
+            if isinstance(data, dict):
+                # Update specific world_model roots as requested
+                for k in ["user_present", "faces", "emotion"]:
+                    if k in data:
+                        self.world_state[k] = data[k]
             self.logger.debug(f"WorldModel vision update: {source}")
         except Exception:
             pass
