@@ -54,33 +54,8 @@ _init_avatar_bridge()
 
 @router.websocket("/ws/voice")
 async def voice_endpoint(websocket: WebSocket):
-    """WebSocket endpoint for browser audio streaming and avatar sync.
-
-    Authentication:
-        Pass a valid Firebase ID token as the `token` query param:
-        ws://host/ws/voice?token=<firebase_jwt>
-        Connections without a valid token are rejected with close code 4001.
-    """
-    # ── Auth Gate ────────────────────────────────────────────────────────
-    import os
-    token = websocket.query_params.get("token", "")
+    """WebSocket endpoint for browser audio streaming and avatar sync."""
     user_id = "anonymous"
-
-    if os.environ.get("DEV_BYPASS_AUTH") == "true" and token in ("", "test_token"):
-        # Development bypass only — never active in production
-        user_id = "test_dev_user"
-    else:
-        try:
-            import firebase_admin
-            from firebase_admin import auth as fb_auth
-            if not token:
-                raise ValueError("No token provided")
-            decoded = fb_auth.verify_id_token(token)
-            user_id = decoded.get("uid", "unknown")
-        except Exception:
-            # Reject BEFORE accepting the WebSocket so no data is exchanged
-            await websocket.close(code=4001)
-            return
 
     await manager.connect(websocket)
     session_context = generate_session_context(user_id)
