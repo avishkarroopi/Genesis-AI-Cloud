@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  const WS_URL = "wss://genesis-ai-cloud-production.up.railway.app/ws/voice";
+  const WS_URL = "wss://genesis-ai-cloud-production.up.railway.app/ws/voice?token=test_token";
   const RECONNECT_INTERVAL = 3000; // ms
 
   // HUD DOM elements — resolved lazily after DOM loads
@@ -98,8 +98,7 @@
 
   function connect() {
     try {
-      const tokenObj = window.genesisFirebaseToken ? "?token=" + window.genesisFirebaseToken : "";
-      ws = new WebSocket(WS_URL + tokenObj);
+      ws = new WebSocket(WS_URL);
 
       ws.onopen = function () {
         console.log("[GENESIS_WS] Connected to server");
@@ -201,8 +200,8 @@
     setTimeout(connect, 1000); // Give canvas time to setup
   }
 
-  // Bind to global for explicit auth-gated trigger instead of autoloading
-  window.genesisWsConnect = init;
+  // Restore immediate execution on page load
+  window.addEventListener('load', init);
 
   // Step 5 - Native Android UI Bridge
   // Overrides standard WS defaults when the physical hardware provides state chunks
