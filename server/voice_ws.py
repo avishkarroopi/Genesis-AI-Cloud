@@ -46,6 +46,7 @@ def _init_avatar_bridge():
             
         if bus:
             bus.subscribe("AVATAR_EVENT", on_avatar_event)
+            bus.subscribe("sys_stats", on_avatar_event)
     except Exception:
         pass
 

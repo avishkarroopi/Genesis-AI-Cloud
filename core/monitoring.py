@@ -164,7 +164,7 @@ class SystemMonitor:
         
         self._running = False
         self._monitor_task: Optional[asyncio.Task] = None
-        self._monitor_frequency = 5.0
+        self._monitor_frequency = 2.0
         
         self._thresholds = {
             "cpu_percent": 85.0,
@@ -229,6 +229,18 @@ class SystemMonitor:
                         {"metric": metric.to_dict()},
                         priority=EventPriority.HIGH
                     )
+            
+            # Send continuous system stats for HUD
+            await self.event_bus.publish(
+                "sys_stats",
+                "system_monitor",
+                {
+                    "cpu": cpu_percent,
+                    "ram": memory.percent,
+                    "gpu": None
+                },
+                priority=EventPriority.LOW
+            )
         
         except Exception as e:
             self.logger.error(f"Resource check error: {e}")

@@ -1,0 +1,220 @@
+/* ═══ GENESIS Subscription Screen ═══ */
+#genesis-subscription-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 99996;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+}
+#genesis-subscription-screen.visible { opacity: 1; }
+#genesis-subscription-screen.fade-out { opacity: 0; pointer-events: none; }
+
+#sub-bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
+
+/* ── Header ── */
+.sub-header {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-top: 36px;
+  margin-bottom: 28px;
+}
+.sub-title {
+  font-size: clamp(28px, 4vw, 50px);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 6px;
+  text-shadow: 0 0 16px rgba(0,255,255,0.3);
+}
+.sub-subtitle {
+  font-size: clamp(12px, 1.3vw, 18px);
+  color: #8899aa;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* ── Plan Cards Grid ── */
+.sub-plans {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  max-width: 1200px;
+  width: 92%;
+  margin-bottom: 28px;
+}
+
+.sub-card {
+  background: rgba(15,30,50,0.55);
+  border: 1px solid rgba(0,229,255,0.18);
+  border-radius: 14px;
+  padding: 24px 20px 20px;
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.sub-card:hover {
+  border-color: rgba(0,229,255,0.45);
+  box-shadow: 0 0 20px rgba(0,229,255,0.12);
+}
+.sub-card.popular {
+  border-color: rgba(0,229,255,0.5);
+  box-shadow: 0 0 22px rgba(0,229,255,0.15);
+}
+.sub-popular-badge {
+  position: absolute;
+  top: -14px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,229,255,0.15);
+  border: 1px solid #00e5ff;
+  border-radius: 20px;
+  padding: 3px 16px;
+  font-size: 10px;
+  color: #00e5ff;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+}
+.sub-plan-name {
+  font-size: clamp(15px, 1.5vw, 20px);
+  font-weight: 700;
+  color: #e0eaf0;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.sub-plan-price {
+  font-size: clamp(12px, 1.1vw, 15px);
+  color: #00e5ff;
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* ── Feature lists ── */
+.sub-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px 0;
+  flex: 1;
+}
+.sub-features li {
+  font-size: clamp(10px, 0.85vw, 12px);
+  color: #a0b8c8;
+  padding: 3px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.4;
+}
+.sub-features li .fi { color: #00e5ff; font-size: 13px; flex-shrink: 0; }
+.sub-features li .fx { color: #ff5555; font-size: 13px; flex-shrink: 0; }
+.sub-features li .fb { color: #00e5ff; font-size: 11px; flex-shrink: 0; padding: 1px 6px; border: 1px solid rgba(0,229,255,0.35); border-radius: 4px; background: rgba(0,229,255,0.08); }
+
+.sub-restrictions-title {
+  font-size: 11px;
+  color: #8090a0;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+/* ── Subscribe Button ── */
+.sub-subscribe-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #c0dbe8;
+  background: transparent;
+  border: 1px solid rgba(0,229,255,0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.sub-subscribe-btn:hover {
+  border-color: #00e5ff;
+  color: #00e5ff;
+  box-shadow: 0 0 14px rgba(0,229,255,0.25);
+}
+
+/* ── GENESIS ALL Button ── */
+.sub-genesis-all {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin: 10px 0 28px;
+  padding: 20px 44px;
+  border: 2px solid rgba(0,229,255,0.35);
+  border-radius: 12px;
+  background: rgba(0,229,255,0.04);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 540px;
+}
+.sub-genesis-all:hover {
+  border-color: #00e5ff;
+  box-shadow: 0 0 28px rgba(0,229,255,0.2);
+  background: rgba(0,229,255,0.08);
+}
+.sub-genesis-all-title {
+  font-size: clamp(18px, 2.2vw, 30px);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 4px;
+}
+.sub-genesis-all-sub {
+  font-size: clamp(11px, 1vw, 14px);
+  color: #00e5ff;
+  margin-top: 2px;
+  font-style: italic;
+}
+.sub-genesis-all-desc {
+  font-size: clamp(10px, 0.85vw, 12px);
+  color: #8899aa;
+  margin-top: 4px;
+}
+
+.sub-footer {
+  position: relative;
+  z-index: 2;
+  font-size: 12px;
+  color: #6677889a;
+  margin-bottom: 30px;
+}
+
+/* ── Sparkle ── */
+.sub-sparkle {
+  position: fixed;
+  bottom: 40px; right: 40px;
+  width: 28px; height: 28px;
+  z-index: 2; opacity: 0.55;
+  animation: sub-sparkle-spin 6s linear infinite;
+}
+@keyframes sub-sparkle-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .sub-plans { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .sub-plans { grid-template-columns: 1fr; }
+}

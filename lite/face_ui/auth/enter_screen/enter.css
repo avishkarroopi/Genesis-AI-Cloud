@@ -1,0 +1,171 @@
+/* ═══ GENESIS Enter Screen ═══ */
+#genesis-enter-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 99998;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 1s ease;
+  overflow: hidden;
+  font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+}
+#genesis-enter-screen.visible { opacity: 1; }
+#genesis-enter-screen.fade-out { opacity: 0; pointer-events: none; }
+
+/* ── Neural Network Canvas Background ── */
+#enter-bg-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
+
+/* ── Content ── */
+.enter-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.enter-title {
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 12px;
+  text-shadow:
+    0 0 20px rgba(0,255,255,0.4),
+    0 0 60px rgba(0,255,255,0.15);
+  margin-bottom: 0;
+}
+.enter-subtitle {
+  font-size: clamp(13px, 1.6vw, 22px);
+  color: #b0c4d8;
+  letter-spacing: 4px;
+  margin-top: 0;
+  font-weight: 300;
+}
+
+/* ── AI Core indicator ── */
+.enter-core-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 6px 18px;
+  border: 1px solid rgba(0,255,255,0.35);
+  border-radius: 20px;
+  background: rgba(0,255,255,0.06);
+}
+.enter-core-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #00ffcc;
+  box-shadow: 0 0 8px #00ffcc;
+  animation: enter-pulse-dot 2s ease-in-out infinite;
+}
+.enter-core-label {
+  font-size: clamp(11px, 1.1vw, 15px);
+  color: #00e5ff;
+  letter-spacing: 2px;
+  font-weight: 500;
+}
+
+/* ── Enter Button ── */
+.enter-btn-wrapper {
+  margin-top: 38px;
+}
+.enter-btn {
+  position: relative;
+  padding: 16px 48px;
+  font-size: clamp(14px, 1.5vw, 20px);
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: #00e5ff;
+  background: transparent;
+  border: 2px solid #00e5ff;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 0 12px rgba(0,229,255,0.25),
+    inset 0 0 12px rgba(0,229,255,0.08);
+}
+.enter-btn::before,
+.enter-btn::after {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 2px solid #00e5ff;
+  transition: all 0.3s ease;
+}
+.enter-btn::before {
+  top: -6px; left: -6px;
+  border-right: none; border-bottom: none;
+}
+.enter-btn::after {
+  bottom: -6px; right: -6px;
+  border-left: none; border-top: none;
+}
+.enter-btn:hover {
+  background: rgba(0,229,255,0.12);
+  box-shadow:
+    0 0 30px rgba(0,229,255,0.45),
+    inset 0 0 20px rgba(0,229,255,0.12);
+  text-shadow: 0 0 10px rgba(0,229,255,0.6);
+}
+
+/* ── Footer ── */
+.enter-footer {
+  position: absolute;
+  bottom: 48px;
+  text-align: center;
+  z-index: 2;
+}
+.enter-footer-powered {
+  font-size: clamp(11px, 1vw, 14px);
+  color: #8899aa;
+}
+.enter-footer-powered strong {
+  color: #c0d0e0;
+}
+.enter-footer-creator {
+  font-size: clamp(10px, 0.9vw, 13px);
+  color: #6677889a;
+  margin-top: 4px;
+}
+.enter-footer-disclaimer {
+  font-size: clamp(9px, 0.7vw, 11px);
+  color: #556677;
+  margin-top: 14px;
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+/* ── Sparkle star ── */
+.enter-sparkle {
+  position: absolute;
+  bottom: 50px;
+  right: 40px;
+  width: 28px; height: 28px;
+  z-index: 2;
+  opacity: 0.6;
+  animation: enter-sparkle-rotate 6s linear infinite;
+}
+
+@keyframes enter-pulse-dot {
+  0%, 100% { opacity: 0.7; box-shadow: 0 0 6px #00ffcc; }
+  50% { opacity: 1; box-shadow: 0 0 14px #00ffcc, 0 0 24px #00ffcc55; }
+}
+@keyframes enter-sparkle-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
