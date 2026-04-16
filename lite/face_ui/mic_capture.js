@@ -12,7 +12,7 @@ window.WebSocket = function(...args) {
 
 // Start microphone streaming
 window.startMicrophoneStreaming = async function() {
-    if (!currentWs || currentWs.readyState !== WebSocket.OPEN) {
+    if (!currentWs || currentWs.readyState !== 1) { // 1 = OPEN
         console.error("[MIC] WebSocket not ready. Cannot stream audio.");
         return;
     }
@@ -25,7 +25,7 @@ window.startMicrophoneStreaming = async function() {
         const mediaRecorder = new MediaRecorder(stream, options);
 
         mediaRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0 && currentWs.readyState === WebSocket.OPEN) {
+            if (event.data && event.data.size > 0 && currentWs.readyState === 1) { // 1 = OPEN
                 currentWs.send(event.data);
             }
         };

@@ -72,6 +72,21 @@ def bootstrap_phase3_subsystems():
         except Exception as e:
             logger.warning(f"[BOOTSTRAP] Behavior engine skipped: {e}")
 
+    # ── Phase 1 & 1.5 Tools and Agents ──
+    try:
+        from core.tools.init_tools import init_all_tools
+        init_all_tools()
+        logger.info("[BOOTSTRAP] ✓ Tool Layer initialized")
+    except Exception as e:
+        logger.warning(f"[BOOTSTRAP] Tool Layer initialization skipped: {e}")
+
+    try:
+        from core.agents.init_agents import init_all_agents
+        init_all_agents()
+        logger.info("[BOOTSTRAP] ✓ Agent Layer initialized")
+    except Exception as e:
+        logger.warning(f"[BOOTSTRAP] Agent Layer initialization skipped: {e}")
+
     logger.info("[BOOTSTRAP] Phase-3 subsystem bootstrap complete")
 
 

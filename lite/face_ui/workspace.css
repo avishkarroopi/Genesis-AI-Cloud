@@ -1,0 +1,254 @@
+/* ═══════════════════════════════════════════════════════════════
+   GENESIS WORKSPACE INTERFACE SYSTEM — Shared Styles
+   AI Command Center Dark Theme
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --ws-bg: #060a10;
+  --ws-panel: rgba(8, 16, 28, 0.85);
+  --ws-border: rgba(0, 240, 255, 0.12);
+  --ws-accent: #00f0ff;
+  --ws-accent2: #7b61ff;
+  --ws-accent3: #00ff88;
+  --ws-text: #c8d6e5;
+  --ws-text-dim: #5a7184;
+  --ws-danger: #ff4757;
+  --ws-warn: #ffa502;
+  --ws-glow: 0 0 20px rgba(0,240,255,0.15);
+  --ws-radius: 12px;
+  --ws-font: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+  --ws-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
+/* ── Workspace Container ── */
+#genesis-workspace-layer {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 99990;
+  display: none;
+  font-family: var(--ws-font);
+  color: var(--ws-text);
+  background: var(--ws-bg);
+  overflow: hidden;
+}
+#genesis-workspace-layer.active { display: flex; }
+
+/* ── Sidebar ── */
+.ws-sidebar {
+  width: 260px; height: 100%;
+  background: rgba(6,10,18,0.97);
+  border-right: 1px solid var(--ws-border);
+  display: flex; flex-direction: column;
+  padding: 16px 0;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.ws-sidebar-logo {
+  padding: 8px 20px 20px;
+  font-size: 18px; font-weight: 700;
+  color: var(--ws-accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--ws-border);
+  margin-bottom: 12px;
+  text-shadow: 0 0 12px rgba(0,240,255,0.4);
+}
+.ws-nav-item {
+  padding: 10px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  transition: all 0.25s ease;
+  color: var(--ws-text-dim);
+  border-left: 3px solid transparent;
+}
+.ws-nav-item:hover {
+  background: rgba(0,240,255,0.04);
+  color: var(--ws-text);
+}
+.ws-nav-item.active {
+  background: rgba(0,240,255,0.07);
+  color: var(--ws-accent);
+  border-left-color: var(--ws-accent);
+}
+.ws-nav-item .nav-icon { font-size: 16px; width: 22px; text-align: center; }
+.ws-nav-divider { height: 1px; background: var(--ws-border); margin: 8px 16px; }
+.ws-sidebar-close {
+  margin-top: auto; padding: 12px 20px;
+  font-size: 13px; color: var(--ws-danger);
+  cursor: pointer; text-align: center;
+  border-top: 1px solid var(--ws-border);
+  transition: background 0.2s;
+}
+.ws-sidebar-close:hover { background: rgba(255,71,87,0.08); }
+
+/* ── Main Content ── */
+.ws-main {
+  flex: 1; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.ws-header {
+  padding: 16px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--ws-border);
+  background: rgba(6,10,18,0.6);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+}
+.ws-header-title { font-size: 20px; font-weight: 600; color: #fff; }
+.ws-header-subtitle { font-size: 12px; color: var(--ws-text-dim); margin-top: 2px; }
+.ws-header-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--ws-accent3);
+}
+.ws-header-status .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ws-accent3);
+  box-shadow: 0 0 8px var(--ws-accent3);
+  animation: wsPulse 2s infinite;
+}
+.ws-content {
+  flex: 1; overflow-y: auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+  align-content: start;
+}
+
+/* ── Panel Cards ── */
+.ws-panel {
+  background: var(--ws-panel);
+  border: 1px solid var(--ws-border);
+  border-radius: var(--ws-radius);
+  padding: 20px;
+  box-shadow: var(--ws-glow);
+  backdrop-filter: blur(8px);
+  animation: wsPanelReveal 0.5s ease forwards;
+  opacity: 0;
+  transform: translateY(12px);
+}
+.ws-panel:nth-child(2) { animation-delay: 0.08s; }
+.ws-panel:nth-child(3) { animation-delay: 0.16s; }
+.ws-panel:nth-child(4) { animation-delay: 0.24s; }
+.ws-panel:nth-child(5) { animation-delay: 0.32s; }
+.ws-panel:nth-child(6) { animation-delay: 0.40s; }
+.ws-panel-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--ws-accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ws-panel-title .panel-icon { font-size: 15px; }
+.ws-panel.span-2 { grid-column: span 2; }
+
+/* ── Stat Tiles ── */
+.ws-stat-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.ws-stat {
+  flex: 1; min-width: 100px;
+  background: rgba(0,240,255,0.03);
+  border: 1px solid rgba(0,240,255,0.08);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+.ws-stat-value {
+  font-size: 26px; font-weight: 700;
+  color: #fff;
+  font-family: var(--ws-mono);
+}
+.ws-stat-label {
+  font-size: 10px; text-transform: uppercase;
+  color: var(--ws-text-dim);
+  letter-spacing: 1px; margin-top: 4px;
+}
+.ws-stat.good .ws-stat-value { color: var(--ws-accent3); }
+.ws-stat.warn .ws-stat-value { color: var(--ws-warn); }
+.ws-stat.bad .ws-stat-value { color: var(--ws-danger); }
+
+/* ── Data Lists ── */
+.ws-list { list-style: none; padding: 0; margin: 0; }
+.ws-list li {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,240,255,0.05);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+.ws-list li:hover { background: rgba(0,240,255,0.03); }
+.ws-badge {
+  display: inline-block; padding: 2px 8px;
+  border-radius: 4px; font-size: 10px;
+  font-weight: 600; text-transform: uppercase;
+}
+.ws-badge.online { background: rgba(0,255,136,0.15); color: var(--ws-accent3); }
+.ws-badge.offline { background: rgba(255,71,87,0.15); color: var(--ws-danger); }
+.ws-badge.idle { background: rgba(90,113,132,0.2); color: var(--ws-text-dim); }
+.ws-badge.active { background: rgba(0,240,255,0.15); color: var(--ws-accent); }
+
+/* ── Mini Charts (CSS-only bars) ── */
+.ws-bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 80px; }
+.ws-bar {
+  flex: 1; background: linear-gradient(to top, var(--ws-accent), rgba(0,240,255,0.3));
+  border-radius: 3px 3px 0 0;
+  min-width: 12px;
+  animation: wsBarGrow 1s ease forwards;
+  transform-origin: bottom;
+}
+.ws-bar.purple { background: linear-gradient(to top, var(--ws-accent2), rgba(123,97,255,0.3)); }
+.ws-bar.green { background: linear-gradient(to top, var(--ws-accent3), rgba(0,255,136,0.3)); }
+
+/* ── Log Console ── */
+.ws-log {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0,240,255,0.06);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: var(--ws-mono);
+  font-size: 11px;
+  max-height: 200px;
+  overflow-y: auto;
+  line-height: 1.7;
+  color: var(--ws-text-dim);
+}
+.ws-log .log-time { color: var(--ws-accent); margin-right: 8px; }
+.ws-log .log-ok { color: var(--ws-accent3); }
+.ws-log .log-warn { color: var(--ws-warn); }
+.ws-log .log-err { color: var(--ws-danger); }
+
+/* ── Progress Ring ── */
+.ws-ring {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 4px solid rgba(0,240,255,0.1);
+  border-top-color: var(--ws-accent);
+  display: flex; align-items: center; justify-content: center;
+  animation: wsRingSpin 3s linear infinite;
+  margin: 0 auto;
+}
+.ws-ring-value { font-size: 18px; font-weight: 700; color: #fff; font-family: var(--ws-mono); }
+
+/* ── Animations ── */
+@keyframes wsPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes wsPanelReveal { to { opacity: 1; transform: translateY(0); } }
+@keyframes wsBarGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes wsRingSpin { to { transform: rotate(360deg); } }
+@keyframes wsGlow {
+  0%,100% { box-shadow: 0 0 8px rgba(0,240,255,0.1); }
+  50% { box-shadow: 0 0 24px rgba(0,240,255,0.3); }
+}
+@keyframes wsDataStream {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ── Glow Pulse Panels ── */
+.ws-panel.glow { animation: wsPanelReveal 0.5s ease forwards, wsGlow 3s ease-in-out infinite 0.6s; }
+
+/* ── Scrollbar ── */
+.ws-content::-webkit-scrollbar, .ws-sidebar::-webkit-scrollbar { width: 5px; }
+.ws-content::-webkit-scrollbar-track, .ws-sidebar::-webkit-scrollbar-track { background: transparent; }
+.ws-content::-webkit-scrollbar-thumb, .ws-sidebar::-webkit-scrollbar-thumb { background: rgba(0,240,255,0.15); border-radius: 4px; }

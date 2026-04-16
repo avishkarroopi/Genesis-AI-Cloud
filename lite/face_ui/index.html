@@ -33,6 +33,8 @@
   <link rel="stylesheet" href="auth/login_screen/login.css">
   <link rel="stylesheet" href="billing/subscription/subscription.css">
   <link rel="stylesheet" href="growth/referral/referral.css">
+  <!-- ═══ WORKSPACE INTERFACE SYSTEM ═══ -->
+  <link rel="stylesheet" href="workspace.css">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script type="module" src="face.js"></script>
@@ -53,6 +55,23 @@
   <script src="mic_capture.js"></script>
   <script src="camera_capture.js"></script>
   <script src="vision_engine.js"></script>
+  <!-- ═══ WORKSPACE INTERFACE SYSTEM ═══ -->
+  <script src="workspace_manager.js"></script>
+  <script src="workspace_router.js"></script>
+  <script src="workspaces/conversation_interface/index.js"></script>
+  <script src="workspaces/coding_lab/index.js"></script>
+  <script src="workspaces/agent_manager/index.js"></script>
+  <script src="workspaces/system_control/index.js"></script>
+  <script src="workspaces/memory_explorer/index.js"></script>
+  <script src="workspaces/system_intelligence_monitor/index.js"></script>
+  <script src="workspaces/model_health_monitor/index.js"></script>
+  <script src="workspaces/research_workspace/index.js"></script>
+  <script src="workspaces/strategic_workspace/index.js"></script>
+  <script src="workspaces/personal_intelligence_dashboard/index.js"></script>
+  <script src="workspaces/learning_engine/index.js"></script>
+  <script src="workspaces/synthetic_intelligence_core/index.js"></script>
+  <script src="workspaces/health_monitor/index.js"></script>
+  <script src="workspaces/human_analysis/index.js"></script>
 </head>
 
 <body>
@@ -95,11 +114,11 @@
   </div>
 
   <!-- ═══ PAGE OVERLAY CONTAINER ═══ -->
-  <div id="genesis-page-overlay"></div>
+  <div id="genesis-page-overlay" style="position: absolute; top:0; left:0; width:100vw; height:100vh; background: #000; z-index: 99995;"></div>
 
   <!-- UI CONTROLS (Restored to stable button layout) -->
-  <button id="startVoice" style="position:absolute; top:20px; left:20px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.2); color: #0ff; outline: none; border: 1px solid #0ff; cursor: pointer; border-radius: 5px;">Start Voice</button>
-  <button id="cameraToggle" style="position:absolute; top:20px; left:140px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.1); color: gray; outline: none; border: 1px solid gray; cursor: pointer; border-radius: 5px;">Camera OFF</button>
+  <button id="startVoice" style="display:none; position:absolute; top:20px; left:20px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.2); color: #0ff; outline: none; border: 1px solid #0ff; cursor: pointer; border-radius: 5px;">Start Voice</button>
+  <button id="cameraToggle" style="display:none; position:absolute; top:20px; left:140px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.1); color: gray; outline: none; border: 1px solid gray; cursor: pointer; border-radius: 5px;">Camera OFF</button>
   <script>
     document.getElementById("startVoice").onclick = function() {
         if (window.startMicrophoneStreaming) window.startMicrophoneStreaming();

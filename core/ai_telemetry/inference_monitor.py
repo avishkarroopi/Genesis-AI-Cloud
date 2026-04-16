@@ -35,7 +35,30 @@ class InferenceMonitor:
         logger.info("[TELEMETRY] Inference Monitor batch processor started.")
 
     def record_event(self, category: str, dimensions: Dict[str, Any], count: int = 1):
-        """Push an event to Redis."""
+        """Push an event to Redis and track anomalies in memory."""
+        # Anomaly tracking
+        if dimensions.get("failed") == True:
+            if not hasattr(self, "_fail_count"):
+                self._fail_count = 0
+                self._fail_reset = time.time()
+                
+            # Reset counter every 30 seconds
+            if time.time() - self._fail_reset > 30:
+                self._fail_count = 0
+                self._fail_reset = time.time()
+                
+            self._fail_count += count
+            
+            if self._fail_count >= 5:
+                try:
+                    from core.event_bus import get_event_bus
+                    bus = get_event_bus()
+                    if bus:
+                        bus.publish_sync("anomaly_detected", "inference_monitor", {"reason": "High failure rate detected"})
+                except Exception as e:
+                    logger.debug(f"Failed to publish anomaly: {e}")
+                self._fail_count = 0
+
         r = self._get_redis()
         if not r:
             logger.warning("[TELEMETRY] Redis missing, dropping metric.")

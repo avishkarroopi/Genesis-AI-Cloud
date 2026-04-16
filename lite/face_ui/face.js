@@ -291,6 +291,14 @@ function handleResize() {
   sceneOffsetX = (canvasDisplayW - LOGICAL_W * sceneScale) / 2;
   sceneOffsetY = (canvasDisplayH - LOGICAL_H * sceneScale) / 2;
 
+  const hud = document.getElementById('hud-overlay');
+  if (hud) {
+    hud.style.width = (LOGICAL_W * sceneScale) + 'px';
+    hud.style.height = (LOGICAL_H * sceneScale) + 'px';
+    hud.style.left = sceneOffsetX + 'px';
+    hud.style.top = sceneOffsetY + 'px';
+  }
+
   if (typeof resizeThreeJS === 'function') resizeThreeJS();
 }
 

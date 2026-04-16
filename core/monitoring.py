@@ -175,8 +175,8 @@ class SystemMonitor:
     
     async def start(self):
         """Start the monitor."""
-        if SAFE_START:
-            return
+        # if SAFE_START:
+        #     return
             
         self._running = True
         self.logger.info("System monitor started")

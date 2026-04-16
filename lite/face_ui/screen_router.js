@@ -83,7 +83,13 @@
 
   // ── Subscription → Dashboard ──
   window.addEventListener("genesis_subscription_complete", function () {
-    // Dashboard is already rendered behind overlays; nothing to do
+    // Reveal dashboard cleanly
+    var overlay = document.getElementById("genesis-page-overlay");
+    if (overlay) overlay.style.display = "none";
+    var startBtn = document.getElementById("startVoice");
+    if (startBtn) startBtn.style.display = "block";
+    var camBtn = document.getElementById("cameraToggle");
+    if (camBtn) camBtn.style.display = "block";
   });
 
   function showSubscription() {
