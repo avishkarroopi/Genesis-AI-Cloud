@@ -52,6 +52,12 @@
     }
     window.addEventListener("resize", resize);
     resize();
+    
+    var isAnimating = true;
+    canvas.__enter_cleanup = function() {
+        isAnimating = false;
+        window.removeEventListener("resize", resize);
+    };
 
     for (var i = 0; i < PARTICLE_COUNT; i++) {
       nodes.push({
@@ -102,7 +108,7 @@
         if (n.y < 0 || n.y > H) n.vy *= -1;
       }
 
-      requestAnimationFrame(draw);
+      if (isAnimating) requestAnimationFrame(draw);
     }
     draw();
   }
@@ -122,6 +128,7 @@
     document.getElementById("enter-genesis-btn").addEventListener("click", function () {
       screen.classList.add("fade-out");
       setTimeout(function () {
+        if (canvas.__enter_cleanup) canvas.__enter_cleanup();
         screen.remove();
         // Dispatch event for screen_router to handle next step
         window.dispatchEvent(new CustomEvent("genesis_enter_complete"));

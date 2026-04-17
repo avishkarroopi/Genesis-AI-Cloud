@@ -114,7 +114,7 @@
   </div>
 
   <!-- ═══ PAGE OVERLAY CONTAINER ═══ -->
-  <div id="genesis-page-overlay" style="position: absolute; top:0; left:0; width:100vw; height:100vh; background: #000; z-index: 99995;"></div>
+  <div id="genesis-page-overlay" style="position: absolute; top:0; left:0; width:100vw; height:100vh; background: #000; z-index: 99995; display: none;"></div>
 
   <!-- UI CONTROLS (Restored to stable button layout) -->
   <button id="startVoice" style="display:none; position:absolute; top:20px; left:20px; z-index:9999; padding: 10px; background: rgba(0,255,255,0.2); color: #0ff; outline: none; border: 1px solid #0ff; cursor: pointer; border-radius: 5px;">Start Voice</button>
@@ -139,10 +139,10 @@
   <!-- Dynamic HUD text overlays -->
   <div id="hud-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;">
     <span id="g-status"
-      style="position:absolute;top:10.8%;right:20.3%;font:bold 1.4vw 'Aperture',sans-serif;color:#c8ced6;"></span>
+      style="position:absolute;top:6vh;right:10vw;font:bold 1.4vw 'Aperture',sans-serif;color:#c8ced6;"></span>
     <!-- Icon Status Row (Restored) -->
     <div id="icon-status-row"
-      style="position:absolute;top:16%;left:74%;display:flex;gap:1vw;align-items:center;z-index:6;opacity:1;padding:4px 8px;background:rgba(0,150,255,0.08);border:1px solid rgba(0,255,255,0.6);border-radius:6px;box-shadow:0 0 8px rgba(0,255,255,0.5);backdrop-filter:blur(4px);">
+      style="position:absolute;top:9vh;right:10vw;display:flex;gap:1vw;align-items:center;z-index:6;opacity:1;padding:0.4vw 0.8vw;background:rgba(0,150,255,0.08);border:1px solid rgba(0,255,255,0.6);border-radius:6px;box-shadow:0 0 8px rgba(0,255,255,0.5);backdrop-filter:blur(4px);">
       <span id="g-network-icon" class="icon-active"><svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="2vw"
           height="2vw" viewBox="0 0 24 24">
           <path
@@ -165,7 +165,7 @@
         </svg></span>
     </div>
     <span id="g-state"
-      style="position:absolute;top:48%;right:25%;font:bold 1.5vw 'Aperture',sans-serif;color:#c8ced6;"></span>
+      style="position:absolute;top:32vh;right:12vw;font:bold 1.5vw 'Aperture',sans-serif;color:#c8ced6;"></span>
     <!-- Clock Widget Overlay -->
     <div id="clock-widget"></div>
     <!-- Stats Widget Overlay -->

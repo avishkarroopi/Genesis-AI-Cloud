@@ -30,6 +30,16 @@ class ConnectionManager:
             except Exception:
                 pass
 
+    async def broadcast_bytes(self, data: bytes):
+        for connection in list(self.active_connections):
+            try:
+                await connection.send_bytes(data)
+            except RuntimeError:
+                # Connection dropped
+                self.disconnect(connection)
+            except Exception:
+                pass
+
 
 manager = ConnectionManager()
 
@@ -44,9 +54,15 @@ def _init_avatar_bridge():
             payload = json.dumps(event.data)
             await manager.broadcast(payload)
             
+        async def on_audio_event(event):
+            # Broadcast the TTS binary directly
+            await manager.broadcast_bytes(event.data)
+            
         if bus:
             bus.subscribe("AVATAR_EVENT", on_avatar_event)
             bus.subscribe("sys_stats", on_avatar_event)
+            bus.subscribe("VISEME_EVENT", on_avatar_event)
+            bus.subscribe("TTS_AUDIO", on_audio_event)
     except Exception:
         pass
 

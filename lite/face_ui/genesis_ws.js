@@ -9,13 +9,17 @@
 (function () {
   "use strict";
 
-  const WS_URL = "wss://genesis-ai-cloud-production.up.railway.app/ws/voice";
+  const WS_URL =
+    window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+      ? "ws://127.0.0.1:8000/ws/voice"
+      : "wss://genesis-ai-cloud-production.up.railway.app/ws/voice";
   const RECONNECT_INTERVAL = 3000; // ms
 
   // HUD DOM elements — resolved lazily after DOM loads
   let elStatus, elAiMode, elAiCore, elVoice, elState, elMic, elCamera, elModel;
 
   let ws = null;
+  window.genesisWsInstance = null;
   let connected = false;
 
   // ─── State color map ───
@@ -99,6 +103,7 @@
   function connect() {
     try {
       ws = new WebSocket(WS_URL);
+      window.genesisWsInstance = ws;
 
       ws.onopen = function () {
         console.log("[GENESIS_WS] Connected to server");
@@ -112,10 +117,25 @@
       };
 
       ws.onmessage = function (evt) {
+        if (evt.data instanceof Blob) {
+            const url = URL.createObjectURL(evt.data);
+            const audio = new Audio(url);
+            audio.play();
+            return;
+        }
+
         try {
           const msg = JSON.parse(evt.data);
-          const type = msg.type || msg.event;
-          const data = msg.data || {};
+          let type = msg.type || msg.event;
+          let data = msg.data || msg;
+
+          // Transcript pipeline repair
+          if (!type && msg.transcript) {
+              type = "transcript";
+              msg.type = "transcript";
+              data.text = msg.transcript;
+              console.log("Voice transcript:", msg);
+          }
 
           // Dispatch global event so decoupled widgets (like stats_widget.js) can listen to 8080 traffic
           window.dispatchEvent(new CustomEvent('genesis_ws_message', { detail: msg }));

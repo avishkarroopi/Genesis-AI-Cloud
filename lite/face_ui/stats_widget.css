@@ -8,8 +8,8 @@
 /* ── Container ── */
 #stats-widget {
   position: absolute;
-  bottom: 23%;
-  left: 19.5%;
+  bottom: 12vw;
+  left: 20%;
   width: 11vw;
   transform: scale(1.15);
   min-width: 140px;

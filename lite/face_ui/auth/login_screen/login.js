@@ -58,6 +58,8 @@
     var COUNT = 70, DIST = 150;
     function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
     window.addEventListener("resize", resize); resize();
+    var isAnimating = true;
+    canvas.__login_cleanup = function() { isAnimating = false; window.removeEventListener("resize", resize); };
     for (var i = 0; i < COUNT; i++) {
       nodes.push({ x: Math.random()*W, y: Math.random()*H, vx: (Math.random()-0.5)*0.45, vy: (Math.random()-0.5)*0.45, r: 1.5+Math.random()*2 });
     }
@@ -73,7 +75,7 @@
         var n=nodes[k]; ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2); ctx.fillStyle="rgba(0,229,255,0.8)"; ctx.shadowColor="#00e5ff"; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
         n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;
       }
-      requestAnimationFrame(draw);
+      if (isAnimating) requestAnimationFrame(draw);
     }
     draw();
   }
@@ -107,6 +109,8 @@
   function dismissLogin(screen) {
     screen.classList.add("fade-out");
     setTimeout(function () {
+      var canvas = document.getElementById("login-bg-canvas");
+      if (canvas && canvas.__login_cleanup) canvas.__login_cleanup();
       screen.remove();
       window.dispatchEvent(new CustomEvent("genesis_login_complete"));
     }, 800);

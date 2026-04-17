@@ -39,15 +39,20 @@
   }
 
   function startFlow() {
-    // Check if user is already logged in
     var loggedIn = localStorage.getItem("genesis_logged_in") === "true";
     if (loggedIn) {
       // Check first login for subscription
       var subscribed = localStorage.getItem("genesis_subscribed") === "true";
       if (!subscribed) {
         showSubscription();
+      } else {
+        // Dashboard loads normally
+        var startBtn = document.getElementById("startVoice");
+        if (startBtn) startBtn.style.display = "block";
+        var camBtn = document.getElementById("cameraToggle");
+        if (camBtn) camBtn.style.display = "block";
+        window.dispatchEvent(new Event("genesis_ui_ready"));
       }
-      // else: dashboard loads normally (already showing)
       return;
     }
     // Show Enter Screen
@@ -90,6 +95,7 @@
     if (startBtn) startBtn.style.display = "block";
     var camBtn = document.getElementById("cameraToggle");
     if (camBtn) camBtn.style.display = "block";
+    window.dispatchEvent(new Event("genesis_ui_ready"));
   });
 
   function showSubscription() {

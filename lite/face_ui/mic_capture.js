@@ -1,19 +1,10 @@
-// Intercept the WebSocket constructor to capture the existing WS connection
-// This ensures we reuse genesis_ws.js's connection without modifying it
-const OriginalWebSocket = window.WebSocket;
-let currentWs = null;
-
-window.WebSocket = function(...args) {
-    const ws = new OriginalWebSocket(...args);
-    // Since we know the app only opens one WebSocket for GENESIS, capture it
-    currentWs = ws;
-    return ws;
-};
+// Removed WebSocket intercept; using window.genesisWsInstance directly.
 
 // Start microphone streaming
 window.startMicrophoneStreaming = async function() {
+    const currentWs = window.genesisWsInstance;
     if (!currentWs || currentWs.readyState !== 1) { // 1 = OPEN
-        console.error("[MIC] WebSocket not ready. Cannot stream audio.");
+        console.error("Voice socket not ready");
         return;
     }
 
@@ -24,9 +15,16 @@ window.startMicrophoneStreaming = async function() {
         const options = { mimeType: "audio/webm;codecs=opus" };
         const mediaRecorder = new MediaRecorder(stream, options);
 
+        let audioChunks = [];
         mediaRecorder.ondataavailable = (event) => {
             if (event.data && event.data.size > 0 && currentWs.readyState === 1) { // 1 = OPEN
-                currentWs.send(event.data);
+                audioChunks.push(event.data);
+                // 250ms chunks, 8 chunks = 2 seconds
+                if (audioChunks.length >= 8) {
+                    const blob = new Blob(audioChunks, { type: "audio/webm;codecs=opus" });
+                    currentWs.send(blob);
+                    audioChunks = [];
+                }
             }
         };
 

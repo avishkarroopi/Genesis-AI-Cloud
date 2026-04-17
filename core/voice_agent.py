@@ -224,6 +224,13 @@ def _speaker_loop():
                 from core.event_bus import get_event_bus
                 bus = get_event_bus()
 
+                try:
+                    audio_bytes = open(wav_path, "rb").read()
+                    if bus:
+                        bus.publish_sync("TTS_AUDIO", "voice", audio_bytes)
+                except Exception as e:
+                    print(f"[VOICE] Error streaming TTS: {e}")
+
                 # STAGE 5: WAV Integrity
                 try:
                     audio_data, samplerate = sf.read(wav_path, dtype='float32')
@@ -242,17 +249,22 @@ def _speaker_loop():
                 playback_duration = len(audio_data) / samplerate
 
                 # Play audio via sounddevice (unified PortAudio backend)
-                print(f"AUDIO TRACE: default device = {sd.default.device}", flush=True)
+                print(f"AUDIO TRACE: default device = {sd.default.device if sd is not None else 'None'}", flush=True)
                 # STAGE 10: External Interruptions check
                 print(f"AUDIO TRACE: interrupt_requested = {_interrupt_requested}", flush=True)
                 print("AUDIO TRACE: playback start", flush=True)
                 audio_start = time.time()
-                sd.play(audio_data, samplerate)
+                if sd is not None:
+                    sd.play(audio_data, samplerate)
 
                 def _rhubarb_worker(txt, a_start, w_path):
                     from core.event_bus import get_event_bus
                     bus = get_event_bus()
-                    rhubarb_exe = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tools", "rhubarb", "rhubarb.exe"))
+                    import os
+                    if os.name == "nt":
+                        rhubarb_exe = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tools", "rhubarb", "rhubarb.exe"))
+                    else:
+                        rhubarb_exe = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tools", "rhubarb", "rhubarb"))
                     cues = []
                     if os.path.exists(rhubarb_exe) and os.path.exists(w_path):
                         try:
@@ -287,17 +299,18 @@ def _speaker_loop():
                                 time.sleep(sleep_dur)
 
                             if bus:
-                                bus.publish_sync("VISEME_EVENT", "voice", {"viseme": q_viseme, "time": q_time})
+                                bus.publish_sync("VISEME_EVENT", "voice", {"type": "VISEME_EVENT", "data": {"viseme": q_viseme, "time": q_time}})
 
                         print("RHUBARB TRACE: viseme events generated", flush=True)
                         if bus:
-                            bus.publish_sync("VISEME_EVENT", "voice", {"viseme": "N", "time": time.time() - a_start})
+                            bus.publish_sync("VISEME_EVENT", "voice", {"type": "VISEME_EVENT", "data": {"viseme": "N", "time": time.time() - a_start}})
                     # No fallback sleep here — sd.wait() handles playback wait
 
                 threading.Thread(target=_rhubarb_worker, args=(text, audio_start, wav_path), daemon=True).start()
 
                 # Block until sounddevice finishes playback — guaranteed completion
-                sd.wait()
+                if sd is not None:
+                    sd.wait()
                 print("AUDIO TRACE: playback end", flush=True)
                 print(f"AUDIO TRACE: playback complete ({playback_duration:.2f}s)", flush=True)
 

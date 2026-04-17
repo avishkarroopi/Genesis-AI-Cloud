@@ -15,7 +15,7 @@
     if (!w) return;
 
     w.innerHTML = `
-      <div class="sw-title">SYS MONITOR</div>
+      <div class="sw-title">SERVER MONITOR</div>
       <div class="sw-row">
         <span class="sw-label">CPU</span>
         <div class="sw-bar-track"><div class="sw-bar-fill sw-cpu" id="sw-cpu-bar"></div></div>

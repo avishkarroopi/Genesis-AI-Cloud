@@ -8,8 +8,8 @@
 /* ── Container ── */
 #clock-widget {
   position: absolute;
-  bottom: 45%;
-  right: 68%;
+  bottom: 25vw;
+  right: 17vw;
   width: 14vw;
   height: 14vw;
   min-width: 160px;

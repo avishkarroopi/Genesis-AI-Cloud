@@ -265,8 +265,10 @@ async function init() {
     window.addEventListener('resize', handleResize);
     handleResize();
 
-    lastTime = performance.now();
-    requestAnimationFrame(renderLoop);
+    window.addEventListener('genesis_ui_ready', function() {
+      lastTime = performance.now();
+      requestAnimationFrame(renderLoop);
+    });
     console.log('[GENESIS] ✅ System active. All landmark checks passed.');
   } catch (err) {
     if (loadText) loadText.innerText = 'CRITICAL ERROR: ' + err.message;
@@ -293,10 +295,10 @@ function handleResize() {
 
   const hud = document.getElementById('hud-overlay');
   if (hud) {
-    hud.style.width = (LOGICAL_W * sceneScale) + 'px';
-    hud.style.height = (LOGICAL_H * sceneScale) + 'px';
-    hud.style.left = sceneOffsetX + 'px';
-    hud.style.top = sceneOffsetY + 'px';
+    hud.style.width = '100vw';
+    hud.style.height = '100vh';
+    hud.style.left = '0px';
+    hud.style.top = '0px';
   }
 
   if (typeof resizeThreeJS === 'function') resizeThreeJS();
