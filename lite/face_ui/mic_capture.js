@@ -5,6 +5,7 @@ let activeStream = null;
 let activeSocket = null;
 let socketCloseHandler = null;
 const WS_OPEN = 1;
+const CHUNK_INTERVAL_MS = 2000;
 
 function getSupportedMimeType() {
     const preferred = [
@@ -70,7 +71,9 @@ window.startMicrophoneStreaming = async function() {
         activeSocket = currentWs;
 
         mediaRecorder.ondataavailable = (event) => {
-            if (!event.data || event.data.size <= 0 || !activeSocket || activeSocket.readyState !== WS_OPEN) return;
+            if (!event.data || event.data.size <= 0) return;
+            if (!activeSocket) return;
+            if (activeSocket.readyState !== WS_OPEN) return;
             activeSocket.send(event.data);
         };
 
@@ -92,13 +95,13 @@ window.startMicrophoneStreaming = async function() {
 
         // Emit self-contained audio chunks every 2 seconds
         try {
-            mediaRecorder.start(2000);
+            mediaRecorder.start(CHUNK_INTERVAL_MS);
         } catch (startErr) {
             console.error("[MIC] Failed to start recorder:", startErr);
             stopRecording();
             return;
         }
-        console.log("[MIC] Streaming audio to backend every 2 seconds...");
+        console.log(`[MIC] Streaming audio to backend every ${CHUNK_INTERVAL_MS}ms...`);
 
     } catch (err) {
         console.error("[MIC] Failed to access microphone:", err);
