@@ -4,6 +4,7 @@ let activeRecorder = null;
 let activeStream = null;
 let activeSocket = null;
 let socketCloseHandler = null;
+const WS_OPEN = 1;
 
 function getSupportedMimeType() {
     const preferred = [
@@ -40,7 +41,7 @@ function stopRecording() {
 // Start microphone streaming
 window.startMicrophoneStreaming = async function() {
     const currentWs = window.genesisWsInstance;
-    if (!currentWs || currentWs.readyState !== 1) { // 1 = OPEN
+    if (!currentWs || currentWs.readyState !== WS_OPEN) {
         console.error("[MIC] Voice socket not ready");
         return;
     }
@@ -64,11 +65,16 @@ window.startMicrophoneStreaming = async function() {
         activeSocket = currentWs;
 
         mediaRecorder.ondataavailable = (event) => {
-            if (!event.data || event.data.size <= 0 || !activeSocket || activeSocket.readyState !== 1) return;
+            if (!event.data || event.data.size <= 0 || !activeSocket || activeSocket.readyState !== WS_OPEN) return;
             activeSocket.send(event.data);
         };
 
         mediaRecorder.onstop = () => {
+            if (activeSocket && socketCloseHandler) {
+                activeSocket.removeEventListener("close", socketCloseHandler);
+            }
+            socketCloseHandler = null;
+            activeSocket = null;
             if (activeStream) activeStream.getTracks().forEach(track => track.stop());
             activeRecorder = null;
             activeStream = null;
@@ -84,7 +90,7 @@ window.startMicrophoneStreaming = async function() {
             console.log("[MIC] WebSocket closed. Stopping recording.");
             stopRecording();
         };
-        currentWs.addEventListener("close", socketCloseHandler, { once: true });
+        currentWs.addEventListener("close", socketCloseHandler);
 
         // Emit self-contained audio chunks every 2 seconds
         mediaRecorder.start(2000);
