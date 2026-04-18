@@ -1,10 +1,59 @@
 // Removed WebSocket intercept; using window.genesisWsInstance directly.
 
+let activeRecorder = null;
+let activeStream = null;
+let activeSocket = null;
+let socketCloseHandler = null;
+const WS_OPEN = 1;
+const CHUNK_INTERVAL_MS = 2000;
+
+function getSupportedMimeType() {
+    const preferred = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/ogg;codecs=opus"
+    ];
+    for (const type of preferred) {
+        if (window.MediaRecorder && MediaRecorder.isTypeSupported(type)) {
+            return type;
+        }
+    }
+    return "";
+}
+
+function stopRecording() {
+    if (activeRecorder && activeRecorder.state !== "inactive") {
+        activeRecorder.stop();
+        return;
+    }
+    cleanupRecordingState();
+}
+
+function cleanupRecordingState() {
+    if (activeSocket && socketCloseHandler) {
+        activeSocket.removeEventListener("close", socketCloseHandler);
+    }
+    socketCloseHandler = null;
+    activeSocket = null;
+
+    if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+    }
+    activeRecorder = null;
+    activeStream = null;
+}
+
 // Start microphone streaming
 window.startMicrophoneStreaming = async function() {
     const currentWs = window.genesisWsInstance;
-    if (!currentWs || currentWs.readyState !== 1) { // 1 = OPEN
-        console.error("Voice socket not ready");
+    if (!currentWs || currentWs.readyState !== WS_OPEN) {
+        console.error("[MIC] Voice socket not ready");
+        return;
+    }
+
+    if (activeRecorder && activeRecorder.state !== "inactive") {
+        console.log("[MIC] Microphone streaming already active.");
         return;
     }
 
@@ -12,37 +61,51 @@ window.startMicrophoneStreaming = async function() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         console.log("[MIC] Microphone access granted.");
 
-        const options = { mimeType: "audio/webm;codecs=opus" };
-        const mediaRecorder = new MediaRecorder(stream, options);
+        const mimeType = getSupportedMimeType();
+        const mediaRecorder = mimeType
+            ? new MediaRecorder(stream, { mimeType })
+            : new MediaRecorder(stream);
 
-        let audioChunks = [];
+        activeRecorder = mediaRecorder;
+        activeStream = stream;
+        activeSocket = currentWs;
+
         mediaRecorder.ondataavailable = (event) => {
-            if (event.data && event.data.size > 0 && currentWs.readyState === 1) { // 1 = OPEN
-                audioChunks.push(event.data);
-                // 250ms chunks, 8 chunks = 2 seconds
-                if (audioChunks.length >= 8) {
-                    const blob = new Blob(audioChunks, { type: "audio/webm;codecs=opus" });
-                    currentWs.send(blob);
-                    audioChunks = [];
-                }
-            }
+            if (!event.data || event.data.size <= 0) return;
+            if (!activeSocket) return;
+            if (activeSocket.readyState !== WS_OPEN) return;
+            activeSocket.send(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            cleanupRecordingState();
+        };
+
+        mediaRecorder.onerror = (event) => {
+            console.error("[MIC] Recorder error:", event.error || event);
+            stopRecording();
         };
 
         // If the socket closes, stop recording
-        currentWs.addEventListener("close", () => {
+        socketCloseHandler = () => {
             console.log("[MIC] WebSocket closed. Stopping recording.");
-            if (mediaRecorder.state !== "inactive") {
-                mediaRecorder.stop();
-            }
-            stream.getTracks().forEach(track => track.stop());
-        });
+            stopRecording();
+        };
+        currentWs.addEventListener("close", socketCloseHandler);
 
-        // Start recording and emit chunks every 250ms
-        mediaRecorder.start(250);
-        console.log("[MIC] Streaming audio to backend every 250ms...");
+        // Emit self-contained audio chunks every 2 seconds
+        try {
+            mediaRecorder.start(CHUNK_INTERVAL_MS);
+        } catch (startErr) {
+            console.error("[MIC] Failed to start recorder:", startErr);
+            stopRecording();
+            return;
+        }
+        console.log(`[MIC] Streaming audio to backend every ${CHUNK_INTERVAL_MS}ms...`);
 
     } catch (err) {
         console.error("[MIC] Failed to access microphone:", err);
         alert("Microphone access denied or unavailable.");
+        stopRecording();
     }
 };
