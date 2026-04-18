@@ -22,15 +22,20 @@ function getSupportedMimeType() {
 }
 
 function stopRecording() {
+    if (activeRecorder && activeRecorder.state !== "inactive") {
+        activeRecorder.stop();
+        return;
+    }
+    cleanupRecordingState();
+}
+
+function cleanupRecordingState() {
     if (activeSocket && socketCloseHandler) {
         activeSocket.removeEventListener("close", socketCloseHandler);
     }
     socketCloseHandler = null;
     activeSocket = null;
 
-    if (activeRecorder && activeRecorder.state !== "inactive") {
-        activeRecorder.stop();
-    }
     if (activeStream) {
         activeStream.getTracks().forEach(track => track.stop());
     }
@@ -70,14 +75,7 @@ window.startMicrophoneStreaming = async function() {
         };
 
         mediaRecorder.onstop = () => {
-            if (activeSocket && socketCloseHandler) {
-                activeSocket.removeEventListener("close", socketCloseHandler);
-            }
-            socketCloseHandler = null;
-            activeSocket = null;
-            if (activeStream) activeStream.getTracks().forEach(track => track.stop());
-            activeRecorder = null;
-            activeStream = null;
+            cleanupRecordingState();
         };
 
         mediaRecorder.onerror = (event) => {
@@ -93,7 +91,13 @@ window.startMicrophoneStreaming = async function() {
         currentWs.addEventListener("close", socketCloseHandler);
 
         // Emit self-contained audio chunks every 2 seconds
-        mediaRecorder.start(2000);
+        try {
+            mediaRecorder.start(2000);
+        } catch (startErr) {
+            console.error("[MIC] Failed to start recorder:", startErr);
+            stopRecording();
+            return;
+        }
         console.log("[MIC] Streaming audio to backend every 2 seconds...");
 
     } catch (err) {
