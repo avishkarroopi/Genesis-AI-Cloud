@@ -2,6 +2,8 @@
 
 let activeRecorder = null;
 let activeStream = null;
+let activeSocket = null;
+let socketCloseHandler = null;
 
 function getSupportedMimeType() {
     const preferred = [
@@ -19,6 +21,12 @@ function getSupportedMimeType() {
 }
 
 function stopRecording() {
+    if (activeSocket && socketCloseHandler) {
+        activeSocket.removeEventListener("close", socketCloseHandler);
+    }
+    socketCloseHandler = null;
+    activeSocket = null;
+
     if (activeRecorder && activeRecorder.state !== "inactive") {
         activeRecorder.stop();
     }
@@ -53,11 +61,11 @@ window.startMicrophoneStreaming = async function() {
 
         activeRecorder = mediaRecorder;
         activeStream = stream;
+        activeSocket = currentWs;
 
         mediaRecorder.ondataavailable = (event) => {
-            const ws = window.genesisWsInstance;
-            if (!event.data || event.data.size <= 0 || !ws || ws.readyState !== 1) return;
-            ws.send(event.data);
+            if (!event.data || event.data.size <= 0 || !activeSocket || activeSocket.readyState !== 1) return;
+            activeSocket.send(event.data);
         };
 
         mediaRecorder.onstop = () => {
@@ -72,10 +80,11 @@ window.startMicrophoneStreaming = async function() {
         };
 
         // If the socket closes, stop recording
-        currentWs.addEventListener("close", () => {
+        socketCloseHandler = () => {
             console.log("[MIC] WebSocket closed. Stopping recording.");
             stopRecording();
-        }, { once: true });
+        };
+        currentWs.addEventListener("close", socketCloseHandler, { once: true });
 
         // Emit self-contained audio chunks every 2 seconds
         mediaRecorder.start(2000);
