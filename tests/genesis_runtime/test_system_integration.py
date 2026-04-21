@@ -153,7 +153,7 @@ def run_test():
     # STAGE 6: Monitoring → Health Report
     print("\n  ── Stage 6: System Health ──")
     try:
-        from core.monitoring import get_system_monitor
+        from core.system_monitor import get_system_monitor
         monitor = get_system_monitor()
         report = monitor.get_health_report()
         assert "overall_status" in report

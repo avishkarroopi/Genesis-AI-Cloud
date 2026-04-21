@@ -42,7 +42,7 @@ def run_test():
         ("AI Router module", lambda: __import__("core.ai_router", fromlist=["route_ai_request"])),
         ("Voice WebSocket module", lambda: __import__("server.voice_ws", fromlist=["router"])),
         ("Brain Chain module", lambda: __import__("core.brain_chain", fromlist=["brain_chain"])),
-        ("Monitoring module", lambda: __import__("core.monitoring", fromlist=["SystemMonitor"])),
+        ("Monitoring module", lambda: __import__("core.system_monitor", fromlist=["SystemMonitor"])),
         ("Security — Hardrock", lambda: __import__("core.security.hardrock_security", fromlist=["sanitize_input"])),
         ("Security — Permissions", lambda: __import__("core.security.permissions", fromlist=["check_permission"])),
         ("Security — SafeMode", lambda: __import__("core.security.safe_mode", fromlist=["is_safe_mode_enabled"])),
@@ -84,7 +84,7 @@ def run_test():
     singleton_checks = [
         ("EventBus singleton", lambda: __import__("core.event_bus", fromlist=["get_event_bus"]).get_event_bus()),
         ("ToolRegistry singleton", lambda: __import__("core.tool_registry", fromlist=["get_tool_registry"]).get_tool_registry()),
-        ("SystemMonitor singleton", lambda: __import__("core.monitoring", fromlist=["get_system_monitor"]).get_system_monitor()),
+        ("SystemMonitor singleton", lambda: __import__("core.system_monitor", fromlist=["get_system_monitor"]).get_system_monitor()),
     ]
 
     for label, fn in singleton_checks:

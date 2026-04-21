@@ -201,6 +201,7 @@
         // Release HUD control back to face.js
         window.__genesis_ws_active = false;
         setOffline();
+        if (elStatus) { elStatus.innerHTML = wrapStatus("RECONNECTING..."); }
         setTimeout(connect, RECONNECT_INTERVAL);
       };
 

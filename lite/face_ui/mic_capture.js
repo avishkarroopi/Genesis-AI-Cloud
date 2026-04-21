@@ -105,6 +105,10 @@ window.startMicrophoneStreaming = async function() {
 
     } catch (err) {
         console.error("[MIC] Failed to access microphone:", err);
+        // Clear UI on mic permission denied
+        window.dispatchEvent(new CustomEvent('genesis_ws_message', { 
+            detail: { type: "set_status", data: { status: "MIC ERROR", mic: "ERROR", state: "ERROR" } } 
+        }));
         alert("Microphone access denied or unavailable.");
         stopRecording();
     }

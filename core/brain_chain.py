@@ -38,7 +38,7 @@ except ImportError:
 
 from core import genesis_tools
 from core.memory.memory_manager import get_user_name, set_user_name, store_entity, get_entities, load_memory, get_all_memory, get_memory_key, set_memory_key
-import prompt_config
+from core import prompt_config
 from core.memory.memory_search import search_memory_safe
 from core import context_manager
 

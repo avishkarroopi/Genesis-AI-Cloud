@@ -8,6 +8,8 @@ from .voice_pipeline_adapter import process_audio_chunk
 
 router = APIRouter()
 
+is_speaking_flag = False
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
@@ -50,11 +52,27 @@ def _init_avatar_bridge():
         bus = get_event_bus()
         
         async def on_avatar_event(event):
+            global is_speaking_flag
+            try:
+                data = event.data
+                if isinstance(data, dict):
+                    # Echo Protection: Sync speaking state
+                    state = data.get("state")
+                    evt_type = data.get("type", data.get("event"))
+                    if state == "SPEAKING" or evt_type == "speech_start":
+                        is_speaking_flag = True
+                    elif state == "IDLE" or evt_type == "speech_stop":
+                        is_speaking_flag = False
+            except Exception:
+                pass
+            
             # Broadcast the event payload to all connected clients
             payload = json.dumps(event.data)
             await manager.broadcast(payload)
             
         async def on_audio_event(event):
+            global is_speaking_flag
+            is_speaking_flag = True
             # Broadcast the TTS binary directly
             await manager.broadcast_bytes(event.data)
             
@@ -68,6 +86,9 @@ def _init_avatar_bridge():
 
 _init_avatar_bridge()
 
+# Opus VBR: Chunks of silence are roughly < 300 bytes. Chunks of speech typically > 1000 bytes.
+VAD_SIZE_THRESHOLD = 500  
+MAX_SILENCE_CHUNKS = 1    # Since mic_capture.js sends 1 chunk per 2s, 1 silent chunk = 2s silence.
 
 @router.websocket("/ws/voice")
 async def voice_endpoint(websocket: WebSocket):
@@ -77,13 +98,46 @@ async def voice_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     session_context = generate_session_context(user_id)
 
+    audio_buffer = b""
+    is_recording = False
+    silence_chunks = 0
+
     try:
         while True:
             message = await websocket.receive()
             if "bytes" in message:
-                response = await process_audio_chunk(message["bytes"], session_context)
-                if response:
-                    await websocket.send_text(response)
+                global is_speaking_flag
+                if is_speaking_flag:
+                    # Drop incoming audio entirely if GENESIS is speaking (Echo Protection)
+                    continue
+                
+                chunk = message["bytes"]
+                
+                # Perform VAD using WebM Opus VBR payload size heuristic
+                if len(chunk) > VAD_SIZE_THRESHOLD:
+                    is_recording = True
+                    silence_chunks = 0
+                    audio_buffer += chunk
+                else:
+                    if is_recording:
+                        audio_buffer += chunk
+                        silence_chunks += 1
+                        
+                        if silence_chunks >= MAX_SILENCE_CHUNKS:
+                            # Speech end detected -> Process accumulated audio
+                            try:
+                                response = await process_audio_chunk(audio_buffer, session_context)
+                                if response:
+                                    await websocket.send_text(response)
+                            except Exception as pipeline_err:
+                                import logging
+                                logging.error(f"Voice pipeline error: {pipeline_err}")
+                            finally:
+                                # Reset VAD safely
+                                audio_buffer = b""
+                                is_recording = False
+                                silence_chunks = 0
+
             elif "text" in message:
                 try:
                     payload = json.loads(message["text"])
@@ -107,4 +161,3 @@ async def voice_endpoint(websocket: WebSocket):
             await websocket.close()
         except Exception:
             pass
-

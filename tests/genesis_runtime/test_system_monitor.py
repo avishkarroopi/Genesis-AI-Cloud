@@ -27,7 +27,7 @@ def run_test():
     # 1. Import
     print("  ── Monitor Module Import ──")
     try:
-        from core.monitoring import (
+        from core.system_monitor import (
             SystemMonitor, SelfRecoverySystem, HealthStatus,
             ComponentType, HealthMetric, Failure, get_system_monitor,
             ModuleRestartStrategy, ConfigReloadStrategy

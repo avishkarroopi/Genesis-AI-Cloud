@@ -69,21 +69,31 @@ _shutdown = False
 # Single Persistent Speaker Thread
 # =====================================================================
 
+def synthesize_google_tts(text):
+    import base64, requests
+    api_key = os.environ.get("GOOGLE_TTS_API_KEY", "")
+    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={api_key}"
+    payload = {
+        "input": {"text": text},
+        "voice": {"languageCode": "en-US", "name": "en-US-Neural2-F"},
+        "audioConfig": {"audioEncoding": "LINEAR16"}
+    }
+    resp = requests.post(url, json=payload, timeout=15)
+    resp.raise_for_status()
+    audio_content = resp.json().get("audioContent", "")
+    return base64.b64decode(audio_content)
+
+
+
 def _speaker_loop():
     """Runs on a single dedicated thread. Owns the pyttsx3 engine forever."""
-    global _is_speaking, _interrupt_requested
+    global _is_speaking, _interrupt_requested, sd, sf
 
-    if not _PYTTSX3_OK:
-        print("[VOICE_AGENT] pyttsx3 not available — speaker thread exiting.", flush=True)
+    google_key_check = os.environ.get("GOOGLE_TTS_API_KEY", "")
+    if not google_key_check and not PIPER_AVAILABLE and not _PYTTSX3_OK:
+        print("[VOICE_AGENT] No TTS engines available — speaker thread exiting.", flush=True)
         _engine_ready.set()
         return
-
-    # COM init for Windows SAPI5
-    try:
-        import pythoncom
-        pythoncom.CoInitialize()
-    except Exception:
-        pass
 
     # Step 3 — Force default output device (sounddevice query, one-time)
     try:
@@ -100,44 +110,41 @@ def _speaker_loop():
     except Exception:
         print("[VOICE] sounddevice not available — using system default", flush=True)
 
-    # Initialize engine ONCE — reuse for all speech
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 160)
-    engine.setProperty('volume', 1.0)
+    if _PYTTSX3_OK:
+        # COM init for Windows SAPI5
+        try:
+            import pythoncom
+            pythoncom.CoInitialize()
+        except Exception:
+            pass
 
-    # Cache voice ID for reuse
-    _cached_voice_id = None
-    voices = engine.getProperty('voices')
-    if voices:
-        for v in voices:
-            name_lower = v.name.lower()
-            if 'zira' in name_lower or 'female' in name_lower:
-                _cached_voice_id = v.id
-                break
-        if not _cached_voice_id:
+        # Initialize engine ONCE — reuse for all speech
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 160)
+        engine.setProperty('volume', 1.0)
+        _cached_voice_id = None
+        voices = engine.getProperty('voices')
+        if voices:
             for v in voices:
-                if 'hazel' in v.name.lower():
+                if 'zira' in v.name.lower() or 'female' in v.name.lower():
                     _cached_voice_id = v.id
                     break
-        if not _cached_voice_id and voices:
-            _cached_voice_id = voices[0].id
-    if _cached_voice_id:
-        engine.setProperty('voice', _cached_voice_id)
+            if not _cached_voice_id:
+                for v in voices:
+                    if 'hazel' in v.name.lower():
+                        _cached_voice_id = v.id
+                        break
+            if not _cached_voice_id: _cached_voice_id = voices[0].id
+        if _cached_voice_id: engine.setProperty('voice', _cached_voice_id)
 
-    # Startup test — verify audio actually works
-    # CRITICAL: Must use save_to_file() here, NOT engine.say().
-    # Mixing say() then save_to_file() on the same pyttsx3 engine
-    # causes a permanent SAPI5 COM deadlock on Windows.
-    _startup_wav = os.path.abspath("temp_audio.wav")
-    engine.save_to_file("Genesis voice ready", _startup_wav)
-    engine.runAndWait()
-
-    # CRITICAL: Destroy startup engine to break pyttsx3 singleton.
-    # pyttsx3.init() returns a singleton. If the startup engine stays
-    # alive, every subsequent pyttsx3.init() in the loop returns the
-    # SAME poisoned object, and runAndWait() deadlocks on the 2nd call.
-    engine.stop()
-    del engine
+        _startup_wav = os.path.abspath("temp_audio.wav")
+        engine.save_to_file("Genesis voice ready", _startup_wav)
+        engine.runAndWait()
+        engine.stop()
+        del engine
+    else:
+        _startup_wav = os.path.abspath("temp_audio.wav")
+        _cached_voice_id = None
 
     try:
         import soundfile as _sf
@@ -179,29 +186,41 @@ def _speaker_loop():
             pass
 
         try:
-            # Re-init engine PER ITERATION — pyttsx3 runAndWait() deadlocks
-            # on 2nd+ call from a background thread (Windows SAPI5 COM bug).
-            # Proven fix: fresh engine per call completes reliably.
-            loop_engine = pyttsx3.init()
-            loop_engine.setProperty('rate', 160)
-            loop_engine.setProperty('volume', 1.0)
-            if _cached_voice_id:
-                loop_engine.setProperty('voice', _cached_voice_id)
-
             import json, wave
             import soundfile as sf
             wav_path = os.path.abspath("temp_audio.wav")
-            print("TTS TRACE: entering save_to_file", flush=True)
-            loop_engine.save_to_file(text, wav_path)
-            print("TTS TRACE: entering runAndWait", flush=True)
-            loop_engine.runAndWait()
-            print("TTS TRACE: runAndWait finished", flush=True)
-            print("TTS TRACE: wav generated", flush=True)
-            try:
-                loop_engine.stop()
-            except Exception:
-                pass
-            del loop_engine
+
+            google_tts_key = os.environ.get("GOOGLE_TTS_API_KEY", "")
+            if google_tts_key:
+                print("[VOICE] Using Google Cloud TTS", flush=True)
+                audio_bytes = synthesize_google_tts(text)
+                with open(wav_path, "wb") as f:
+                    f.write(audio_bytes)
+                print("TTS TRACE: Google TTS wav generated", flush=True)
+            elif PIPER_AVAILABLE:
+                print("[VOICE] Using Piper TTS", flush=True)
+                import subprocess
+                cmd = [_piper_exe, "--model", "en_US-lessac-medium.onnx", "--output_file", wav_path]
+                subprocess.run(cmd, input=text.encode('utf-8'), creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+                print("TTS TRACE: Piper wav generated", flush=True)
+            else:
+                print("[VOICE] Using pyttsx3 fallback", flush=True)
+                loop_engine = pyttsx3.init()
+                loop_engine.setProperty('rate', 160)
+                loop_engine.setProperty('volume', 1.0)
+                if _cached_voice_id:
+                    loop_engine.setProperty('voice', _cached_voice_id)
+                print("TTS TRACE: entering save_to_file", flush=True)
+                loop_engine.save_to_file(text, wav_path)
+                print("TTS TRACE: entering runAndWait", flush=True)
+                loop_engine.runAndWait()
+                print("TTS TRACE: runAndWait finished", flush=True)
+                print("TTS TRACE: wav generated", flush=True)
+                try:
+                    loop_engine.stop()
+                except Exception:
+                    pass
+                del loop_engine
             
             print("TTS TRACE: checking WAV file", flush=True)
             # STAGE 8: File Lock or I/O Delay polling.
@@ -361,8 +380,9 @@ def speak(text):
     _start_speaker_thread()
     _engine_ready.wait(timeout=10)
 
-    if not _PYTTSX3_OK:
-        print("[VOICE] pyttsx3 not available", flush=True)
+    google_key_check = os.environ.get("GOOGLE_TTS_API_KEY", "")
+    if not google_key_check and not PIPER_AVAILABLE and not _PYTTSX3_OK:
+        print("[VOICE] No TTS available", flush=True)
         return
 
     text = apply_pronunciation_fixes(text)
