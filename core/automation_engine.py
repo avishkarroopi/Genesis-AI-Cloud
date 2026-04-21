@@ -8,13 +8,24 @@ from core.config import N8N_URL, N8N_KEY, N8N_WEBHOOK  # type: ignore
 _automation_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="Automation")
 atexit.register(_automation_pool.shutdown, wait=False)
 
-def trigger_webhook(data=None):
-    """Trigger the default n8n webhook with payload."""
+def trigger_webhook(data=None, use_celery=False):
+    """Trigger the default n8n webhook with payload.
+    Set use_celery=True to dispatch via Celery worker instead of ThreadPool."""
     if not N8N_WEBHOOK:
         print("[AUTOMATION] n8n Webhook not configured.", flush=True)
         return "Webhook not configured."
 
     payload = data or {}
+
+    # Optional Celery dispatch
+    if use_celery:
+        try:
+            from core.queue.celery_app import run_automation_task
+            run_automation_task.delay(payload)
+            return "Automation dispatched to Celery worker."
+        except Exception as e:
+            print(f"[AUTOMATION] Celery dispatch failed, using ThreadPool: {e}", flush=True)
+
     headers = {"Content-Type": "application/json"}
     if N8N_KEY:
         headers["Authorization"] = f"Bearer {N8N_KEY}"
@@ -31,6 +42,13 @@ def trigger_webhook(data=None):
             print(f"[AUTOMATION] Webhook error: {e}", flush=True)
 
     _automation_pool.submit(_request)
+
+    try:
+        from core.telemetry.posthog_client import track_event
+        track_event("automation_triggered", {"webhook": N8N_WEBHOOK})
+    except Exception:
+        pass
+
     return "Triggering webhook."
 
 def run_workflow(name, data=None):

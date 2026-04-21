@@ -45,3 +45,14 @@ low_latency = True
 SAFE_START = False
 OWNER_NAME = os.getenv("OWNER_NAME", "Avishkar")
 
+# -- PostHog Analytics --
+POSTHOG_API_KEY = os.getenv("POSTHOG_API_KEY", "")
+POSTHOG_HOST = os.getenv("POSTHOG_HOST", "https://app.posthog.com")
+
+# -- Payment (Cashfree) --
+CASHFREE_APP_ID = os.getenv("CASHFREE_APP_ID", "")
+CASHFREE_SECRET_KEY = os.getenv("CASHFREE_SECRET_KEY", "")
+
+# -- Celery Task Queue --
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL") or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+

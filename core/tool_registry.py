@@ -208,6 +208,11 @@ class ToolRegistry:
             self._execution_history.append(execution_record)
             
             self.logger.debug(f"Tool executed successfully: {tool_id}")
+            try:
+                from core.telemetry.posthog_client import track_event
+                track_event("tool_called", {"tool_id": tool_id, "status": "success"})
+            except Exception:
+                pass
             return result
         
         except Exception as e:

@@ -6,6 +6,14 @@ import re
 import datetime
 import ast
 
+# --- LangSmith Tracing Activation ---
+try:
+    from core.tracing import is_tracing_active
+    if is_tracing_active():
+        print("[BRAIN] LangSmith tracing active", flush=True)
+except Exception:
+    pass
+
 # Fallback for LangChain components to ensure system runs even if dependencies are slow
 try:
     from langchain.memory import ConversationBufferMemory  # type: ignore

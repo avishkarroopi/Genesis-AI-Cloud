@@ -15,6 +15,12 @@ from core.config import GROQ_API_KEY
 from core.config import OPENROUTER_API_KEY
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
+# --- LangSmith Tracing Activation ---
+try:
+    from core.tracing import is_tracing_active
+except Exception:
+    def is_tracing_active(): return False
+
 # --- Verified OpenRouter model IDs ---
 OR_CODING_MODEL = "deepseek/deepseek-chat"
 OR_REASONING_MODEL = "deepseek/deepseek-r1"
@@ -678,6 +684,11 @@ def route_ai_request(prompt, owner_address="Sir", user_command=None, stream=Fals
             from core.ai_telemetry.reasoning_metrics import track_reasoning
             latency_ms = int((time.time() - start_time) * 1000)
             track_reasoning(intent=intent, latency_ms=latency_ms, success=bool(res and res != "Yes?"))
+        except Exception:
+            pass
+        try:
+            from core.telemetry.posthog_client import track_event
+            track_event("prompt_executed", {"intent": intent, "latency_ms": int((time.time() - start_time) * 1000)})
         except Exception:
             pass
         return res

@@ -154,3 +154,56 @@ async def referral_status(user: dict = Depends(verify_firebase_token)):
         return get_referral_stats(user["uid"])
     except Exception as e:
         return {"error": str(e)}
+
+# ── Payment Endpoints (Cashfree) ──────────────────────────────────────────────
+@app.post("/api/payment/create-order")
+async def payment_create_order(request: Request):
+    """Create a Cashfree payment order. Used by frontend to initiate payment."""
+    try:
+        body = await request.json()
+        order_id = body.get("order_id", "")
+        amount = body.get("amount", 0)
+        customer = body.get("customer", {})
+
+        if not order_id or not amount or not customer.get("customer_id"):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail="order_id, amount, and customer.customer_id are required")
+
+        from core.payments.cashfree_gateway import create_order
+        result = create_order(order_id, float(amount), customer)
+        return result
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/api/payment/webhook")
+async def payment_webhook(request: Request):
+    """Handle Cashfree payment webhook callbacks.
+    Verifies signature, processes event, and always returns HTTP 200."""
+    try:
+        raw_body = await request.body()
+        timestamp = request.headers.get("x-webhook-timestamp", "")
+        signature = request.headers.get("x-webhook-signature", "")
+
+        # Verify webhook signature
+        from core.payments.cashfree_gateway import verify_webhook_signature, process_webhook
+        if signature and not verify_webhook_signature(raw_body, timestamp, signature):
+            cloud_logger.warning("Cashfree webhook signature verification failed",
+                                 extra={"category": "payment"})
+            # Still return 200 to avoid Cashfree retries flooding
+            return {"status": "signature_invalid"}
+
+        import json
+        payload = json.loads(raw_body)
+        event_type = payload.get("type", "")
+        data = payload.get("data", {})
+
+        result = process_webhook(event_type, data)
+        cloud_logger.info(f"Cashfree webhook processed: {event_type}",
+                          extra={"category": "payment"})
+        return {"status": "ok", "result": result}
+    except Exception as e:
+        cloud_logger.error(f"Cashfree webhook error: {e}",
+                           extra={"category": "payment_errors"})
+        # Always return 200 to prevent webhook retry storms
+        return {"status": "error", "detail": str(e)}
+
