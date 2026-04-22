@@ -1,0 +1,99 @@
+# ============================================================
+# GENESIS AI — API Service Dependencies
+# Used by: FastAPI cloud service, ASGI runtime, integrations
+# Install: pip install -r requirements-api.txt
+# ============================================================
+
+# --- FastAPI / ASGI Core ---
+fastapi==0.135.3
+starlette==1.0.0
+uvicorn==0.44.0
+pydantic==2.12.5
+pydantic_core==2.41.5
+python-dotenv==1.2.2
+click==8.3.2
+colorama==0.4.6
+
+# --- HTTP / Networking ---
+anyio==4.13.0
+h11==0.16.0
+h2==4.3.0
+hpack==4.1.0
+httpcore==1.0.9
+httptools==0.7.1
+httpx==0.28.1
+hyperframe==6.1.0
+requests==2.33.1
+urllib3==2.6.3
+websockets==16.0
+watchfiles==1.1.1
+certifi==2026.2.25
+charset-normalizer==3.4.7
+idna==3.11
+
+# --- Redis / Celery Orchestration ---
+redis==7.4.0
+celery==5.6.3
+
+# --- Database Drivers ---
+psycopg2-binary==2.9.11
+
+# --- Google Cloud / Firebase ---
+firebase_admin==7.4.0
+google-api-core==2.30.3
+google-auth==2.49.2
+google-cloud-core==2.5.1
+google-cloud-firestore==2.26.0
+google-cloud-storage==3.10.1
+google-crc32c==1.8.0
+google-resumable-media==2.8.2
+googleapis-common-protos==1.74.0
+grpcio==1.80.0
+grpcio-status==1.80.0
+proto-plus==1.27.2
+protobuf==6.33.6
+
+# --- AI / LLM Orchestration ---
+openai==2.32.0
+langchain==0.3.27
+langchain-core==0.3.55
+tiktoken==0.12.0
+tavily-python==0.7.23
+langsmith==0.7.33
+
+# --- External Integrations ---
+twilio==9.8.5
+slack-sdk==3.41.0
+supabase==2.28.3
+posthog==7.13.0
+
+# --- Rate Limiting / Monitoring ---
+slowapi==0.1.9
+sentry-sdk==2.57.0
+limits==5.8.0
+
+# --- Security / Auth ---
+cryptography==46.0.7
+cffi==2.0.0
+pycparser==3.0
+pyasn1==0.6.3
+pyasn1_modules==0.4.2
+PyJWT==2.12.1
+
+# --- Shared Utilities ---
+annotated-doc==0.0.4
+annotated-types==0.7.0
+attrs==26.1.0
+CacheControl==0.14.4
+Deprecated==1.3.1
+msgpack==1.1.2
+packaging==26.0
+pillow==12.2.0
+Pygments==2.20.0
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+six==1.17.0
+tqdm==4.67.3
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+wrapt==2.1.2

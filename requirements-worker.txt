@@ -1,0 +1,53 @@
+# ============================================================
+# GENESIS AI — Worker / ML Inference Dependencies
+# Used by: Celery workers, AI inference, computer vision
+# Install: pip install -r requirements-worker.txt
+# ============================================================
+
+# --- Core Scientific Computing ---
+numpy==2.4.4
+scipy==1.17.1
+
+# --- Computer Vision ---
+opencv-python-headless==4.13.0.92
+albumentations==2.0.8
+albucore==0.0.24
+insightface==0.7.3
+scikit-image==0.26.0
+
+# --- ML / Inference ---
+onnx==1.21.0
+onnxruntime==1.24.4
+scikit-learn==1.8.0
+Cython==3.2.4
+ml_dtypes==0.5.4
+flatbuffers==25.12.19
+simsimd==6.5.16
+stringzilla==4.6.0
+
+# --- Image / Audio I/O ---
+ImageIO==2.37.3
+tifffile==2026.3.3
+soundfile==0.13.1
+
+# --- Visualization / Plotting ---
+matplotlib==3.10.8
+contourpy==1.3.3
+cycler==0.12.1
+fonttools==4.62.1
+kiwisolver==1.5.0
+pyparsing==3.3.2
+
+# --- Math / Graph ---
+sympy==1.14.0
+mpmath==1.3.0
+networkx==3.6.1
+
+# --- Worker Utilities ---
+joblib==1.5.3
+threadpoolctl==3.6.0
+easydict==1.13
+prettytable==3.17.0
+logtail-python==0.3.4
+lazy-loader==0.5
+librt==0.9.0

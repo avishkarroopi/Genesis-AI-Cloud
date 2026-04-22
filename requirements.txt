@@ -114,7 +114,7 @@ langchain
 langchain-core
 tiktoken
 tavily-python
-twilio
+twilio==9.8.5
 slack-sdk
 supabase
 langsmith
